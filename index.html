@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apunte HTML</title>
+</head>
+<body>
+    <h1>Apunte de HTML</h1>
+    <p>
+        Realizados en curso de <a href="https://www.theodinproject.com/about">The Odin Project.</a>
+    </p>
+
+    <!--  -->
+       <h2>Etiquetas sobre semántica de texto:</h2>
+        <p> 
+        Entre las etiquetas que nos permiten dar semántica al texto tenemos:
+       </p> 
+        <ul>
+            <li>
+                <em> em: Sirve para poner énfasis, agregando un estilo itálico. Funciona para screen readers</em> 
+            </li>
+            <li>
+                <strong>
+                    strong: Sirva para indicar importancia, agrega un estilo bold o negrita al texto. También funciona para screen readers. 
+                </strong>
+            </li>
+            
+        </ul>
+       
+       
+       <h2>Listas</h2>
+            <ul> 
+                <li>Listas sin orden: Se encierran entre tags ul. Cada item debe ir encerrado entre tags li.</li> 
+            </ul>
+            <ol>
+                <li>Listas enumeradas: Se encierran entre tags ol. Cada item debe ir encerrado entre tags li.</li>
+                <li> 
+                    <ol>
+                        <li>Se pueden anidar.</li>
+                        <li>Tantas como queramos.</li>
+                    </ol>
+                </li>
+                <li>Y luego continuarlas.</li>
+            </ol>
+        <h2>Links</h2>
+            <p> Para agregar un link usamos la etiqueta a con el atributo href="direccion a la que apunta el link".</p>
+            <p>Por ejemplo: <a href="https://www.google.com/">Este es un link a Google.</a> </p>
+            <p>Si queremos que se abra en otra pestaña usamos taget="_blank" como atributo. Ejemplo: <a href="https://www.google.com/" target="_blank">Este link se abre en otra pestaña.</a></p>
+            <p>Usando el atributo rel="noreferrer" nos prevenimos de phishing attacks como tabnabbing, investigar. Con noopener además evitamos que cierta información de la original se pase a la nueva. Ejemplo: <a href="https://www.google.com/" target="_blank", rel="noopener">Este link se abre en otra pestaña, versión más segura.</a> </p>
+            <h3>Links absolutos:</h3>
+                <p>Son los links a otra sitios de internet. Generalmente siguen la siguiente sintaxis scheme://domain/path.</p>
+            <h3>Links relativos:</h3>
+                <p>Son a distintas páginas de nuestro sitio. Ejemplo: <a href="./pages/about.html", target="_blank">Este es un link a otra página del mismo sitio.</a></p>
+        
+        <h2>Imágenes</h2>
+            <p>Podemos añadir imágenes usando el tag img y especificando la ruta con el atributo src. Ejemplo: 
+                <img src="./images/odin_Project_Logo.png" 
+                     alt="Logo de Odin Project." height="310" width="310">Podemos especificar su tamaño en píxeles, pero conviene hacerlo con CSS por prolijidad. Especificar solo un atributo entre height y width permite que la imagen crezca manteniendo las proporciones originales.</p>
+        <h2>HTML entities</h2>
+            <p>Son palabras resevadas que no podemos escribir así nomás como: lt sino que debemos poner antes ampersand y terminar con punto y coma. Así &lt;</p>
+            <p><a href="https://html.spec.whatwg.org/multipage/named-characters.html">Acá están todas.</a> </p>
+
+    </body>
+</html>
