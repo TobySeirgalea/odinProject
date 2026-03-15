@@ -6,31 +6,16 @@ function validHumanChoice(humanChoice){
     return options.includes(humanChoice);
 }
 
-function getHumanChoice(){
-    let humanChoice; 
-    first_try = true;
-    mensaje = "Introduzca su elección:";
-    while (!validHumanChoice(humanChoice)){
-        humanChoice = prompt(mensaje).toLowerCase();
-        if (first_try){
-            mensaje = "El valor introducido no es válido \n" + mensaje;
-            first_try = false;
-        }
-    }
-    return humanChoice;
-}
-
-
 function isRock(choice){
-    return choice == "rock";
+    return choice == "Rock";
 }
 
 function isScissors(choice){
-    return choice == "scissors";
+    return choice == "Scissors";
 }
 
 function isPaper(choice){
-    return choice == "paper";
+    return choice == "Paper";
 }
 
 function humanWins(humanChoice, computerChoice){
@@ -50,36 +35,60 @@ function getRoundResult(humanChoice, computerChoice){
     return 2;
 }
 
+function updateScore(playerToUpdateScore){
+    if (playerToUpdateScore == "Jugador"){
+        humanScoreParagraph.textContent = "Puntaje jugador: " + humanScore; 
+    }
+    else if (playerToUpdateScore == "Computadora"){
+        computerScoreParagraph.textContent = "Puntaje computadora: " + computerScore;
+    }
+}
+
+function informarGanador(){
+    return (computerScore == 5) ? alert("Computador ha ganado") : alert("Has ganado");
+}
+
+function reiniciarJuego(){
+    humanScore = 0;
+    computerScore = 0;
+    computerScoreParagraph.textContent = "Puntaje computadora: 0";
+    humanScoreParagraph.textContent = "Puntaje jugador: 0";
+    roundResultParagraph.textContent = "Resultado de ronda: "
+}
+
+function updateRoundResult(humanChoice, computerChoice, ganadorRonda){
+    roundResultParagraph.textContent = "Resultado de ronda => Elección jugador: " + humanChoice + "| Elección computadora: " + computerChoice + "| Ganador de ronda: " + ganadorRonda;
+}
+
 function playRound(humanChoice, computerChoice){
+    let ganadorRonda = "Ninguno";
     if( humanChoice != computerChoice){
         roundResult = getRoundResult(humanChoice, computerChoice);
         if (roundResult == 1){
             humanScore += 1;
+            ganadorRonda = "Jugador"
         }
         else if (roundResult == 2){
             computerScore += 1;
+            ganadorRonda = "Computadora";
         }
-    }else{ //Round withdraw;
-
+    }
+    updateScore(ganadorRonda);
+    updateRoundResult(humanChoice, computerChoice, ganadorRonda);
+    if (computerScore == 5 || humanScore == 5){
+        informarGanador();
+        reiniciarJuego();
     }
 }
 
-function playGame(){
-    for(i=0; i<5; i++){
-        playRound(getHumanChoice(), getComputerChoice());
-    }
-    if (humanScore > computerScore){
-        console.log("Humano gana");
-    }
-    else if (computerScore > humanScore){
-        console.log("Computadora gana");
-    }
-    else{
-        console.log("Empate");
-    }
-}
-
-const options = ["rock", "paper", "scissors"];
+const options = ["Rock", "Paper", "Scissors"];
 let humanScore = 0;
 let computerScore = 0;
+const humanScoreParagraph = document.querySelector("#humanScore");
+const computerScoreParagraph = document.querySelector("#computerScore");
+const roundResultParagraph = document.querySelector("#roundResult");
+const playerSelectionButtons = document.querySelectorAll("button");
 
+for (const button of playerSelectionButtons){
+    button.addEventListener("click", (event) => playRound(button.textContent, getComputerChoice()));
+}
