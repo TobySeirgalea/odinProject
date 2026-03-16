@@ -1,0 +1,40 @@
+body{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(9, 30, 61);
+    padding: 50px;
+}
+
+button{
+    width: 300px;
+    height: 100px;
+    border-radius: 50px;
+    background-color: steelblue;
+    border: 10px double white;
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    
+}
+.container{
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 960px;
+    height: 960px;
+    margin: 50px;
+    padding: 40px;
+    border: 20px double black;
+}
+
+.square-div{
+    border: 2px solid black;
+}
+
+.mouseOver{
+    background-color: red;
+}
+
