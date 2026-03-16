@@ -2,13 +2,33 @@ function resizeGrid(){
     const requestedSize = prompt("Introduzca el tamaño deseado para la grilla (max: 100):");
     if (requestedSize <= 100){
         const container = document.querySelector(".container");
-        document.querySelector("body").removeChild(container);
+        document.querySelector("#page-content").removeChild(container);
         createGrid(requestedSize);
     }
     else{
         alert("Ha introducido un valor mayor a 100. Una grilla así consumiría demasiados recursos");
     }
 }
+
+function randomRGB(){
+    const r = Math.floor(Math.random() * 256);
+    const g = Math.floor(Math.random() * 256);
+    const b = Math.floor(Math.random() * 256);
+    return `rgb(${r}, ${g}, ${b})`;
+}
+
+function updateSquareColor(element){
+    let previousOpacity = Number(element.style.opacity);
+    if (element.style.backgroundColor == "white"){
+        element.style.backgroundColor = randomRGB();
+        element.style.opacity = "0.1";
+    }
+    else if (previousOpacity < 1) {
+        console.log(previousOpacity);
+        element.style.opacity = previousOpacity + 0.1;
+    }
+}
+
 
 function createGrid(squares){
     const container = document.createElement("div");
@@ -20,18 +40,17 @@ function createGrid(squares){
             const innerSquareDiv = document.createElement("div");
             innerSquareDiv.style.width = pixelsPerSquare + "px";
             innerSquareDiv.style.height = pixelsPerSquare + "px";
-            innerSquareDiv.classList.add("square-div");
-            innerSquareDiv.addEventListener("mouseenter", (event) => event.target.classList.add("mouseOver"));
-            innerSquareDiv.addEventListener("mouseleave", (event) => event.target.classList.remove("mouseOver"));
+            innerSquareDiv.style.backgroundColor = "white";
+            innerSquareDiv.addEventListener("mouseenter", (event) => updateSquareColor(event.target));
             squareDiv.appendChild(innerSquareDiv);
         }
     container.appendChild(squareDiv);
     }
-    document.querySelector("body").appendChild(container);
+    document.querySelector("#page-content").appendChild(container);
 }
 
 const sizeOfGridButton = document.createElement("button");
 sizeOfGridButton.textContent = "Cambiar cantidad de bloques"
 sizeOfGridButton.addEventListener("click", resizeGrid); 
-document.querySelector("body").appendChild(sizeOfGridButton);
+document.querySelector("#page-content").appendChild(sizeOfGridButton);
 createGrid(16);

@@ -1,10 +1,17 @@
 body{
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background-color: rgb(9, 30, 61);
-    padding: 50px;
+    background-color: rgb(39,39,39);
+}
+
+button:hover{
+    background-color: rgb(33, 111, 175);
+    cursor: pointer;
+}
+
+a{
+    text-decoration: none;
+    color: azure;
 }
 
 button{
@@ -26,15 +33,35 @@ button{
     width: 960px;
     height: 960px;
     margin: 50px;
-    padding: 40px;
-    border: 20px double black;
+    border: 20px double rgb(71, 71, 71);
+    cursor: crosshair;
 }
 
-.square-div{
-    border: 2px solid black;
+#page-content{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
 }
 
-.mouseOver{
-    background-color: red;
+#header{
+    display: flex;
+    padding: 10px 20px;
+    color: azure;
+    margin: 20px;
+    border-radius: 40px;
+    border-left: 10px solid rgb(48, 48, 48);
+    border-bottom: 10px solid rgb(48, 48, 48);
+    justify-content: flex-start;
+    align-items: center;
+    background-color: rgb(32, 32, 32);
+    font-weight: 900;
+    font-family: 'Courier New', Courier, monospace;
 }
 
+
+#header:hover{
+    border-left: 10px solid rgb(110, 110, 110);
+    border-bottom: 10px solid rgb(110, 110, 110);
+}
