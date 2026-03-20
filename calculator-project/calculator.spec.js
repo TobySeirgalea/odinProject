@@ -1,4 +1,5 @@
 const fs = require('fs');
+const { get } = require('http');
 const path = require('path');
 
 // La lectura del HTML sí puede estar afuera (no depende del DOM)
@@ -508,4 +509,375 @@ describe('Tras obtener resultado si ingreso operador, uso resultado como primer 
     getResultButton.click();
     expect(resultDisplay.textContent).toBe("7");
 });
+});
+
+describe('Undo deletes last digit of first operand', () => {
+  test('', () => {
+    const resultDisplay = document.querySelector("#display-text");
+    const digitButtons = document.querySelectorAll(".digits");
+    const operatorButtons = document.querySelectorAll(".operator-button");
+    const getResultButton = document.querySelector("#get-result-button");
+    const clearButton = document.querySelector("#clear-button");
+    const negButton = document.querySelector("#negation-button");
+    const undoButton = document.querySelector("#undo");
+
+    digitButtons[1].click();
+    expect(resultDisplay.textContent).toBe("2");
+    digitButtons[1].click();
+    expect(resultDisplay.textContent).toBe("22");
+    undoButton.click();
+    expect(resultDisplay.textContent).toBe("2");
+});
+});
+
+describe('Undo deletes last digit of second operand', () => {
+  test('', () => {
+    const resultDisplay = document.querySelector("#display-text");
+    const digitButtons = document.querySelectorAll(".digits");
+    const operatorButtons = document.querySelectorAll(".operator-button");
+    const getResultButton = document.querySelector("#get-result-button");
+    const clearButton = document.querySelector("#clear-button");
+    const negButton = document.querySelector("#negation-button");
+    const undoButton = document.querySelector("#undo");
+
+    digitButtons[1].click();
+    expect(resultDisplay.textContent).toBe("2");
+    operatorButtons[0].click()
+    expect(resultDisplay.textContent).toBe("2+");
+    digitButtons[1].click();
+    expect(resultDisplay.textContent).toBe("2+2");
+    undoButton.click();
+    expect(resultDisplay.textContent).toBe("2+");
+});
+});
+
+describe('Undo pressed with cursor over operator does nothing', () => {
+  test('', () => {
+    const resultDisplay = document.querySelector("#display-text");
+    const digitButtons = document.querySelectorAll(".digits");
+    const operatorButtons = document.querySelectorAll(".operator-button");
+    const getResultButton = document.querySelector("#get-result-button");
+    const clearButton = document.querySelector("#clear-button");
+    const negButton = document.querySelector("#negation-button");
+    const undoButton = document.querySelector("#undo");
+
+    digitButtons[1].click();
+    expect(resultDisplay.textContent).toBe("2");
+    operatorButtons[0].click()
+    expect(resultDisplay.textContent).toBe("2+");
+    undoButton.click();
+    expect(resultDisplay.textContent).toBe("2+");
+    digitButtons[0].click();
+    expect(resultDisplay.textContent).toBe("2+1");
+    getResultButton.click();
+    expect(resultDisplay.textContent).toBe("3");
+});
+});
+
+describe('Undo pressed multiple times over second operand deletes lasts digits', () => {
+  test('', () => {
+    const resultDisplay = document.querySelector("#display-text");
+    const digitButtons = document.querySelectorAll(".digits");
+    const operatorButtons = document.querySelectorAll(".operator-button");
+    const getResultButton = document.querySelector("#get-result-button");
+    const clearButton = document.querySelector("#clear-button");
+    const negButton = document.querySelector("#negation-button");
+    const undoButton = document.querySelector("#undo");
+    digitButtons[0].click();
+    expect(resultDisplay.textContent).toBe("1");
+    operatorButtons[0].click();
+    expect(resultDisplay.textContent).toBe("1+");
+    digitButtons[1].click();
+    expect(resultDisplay.textContent).toBe("1+2");
+    digitButtons[2].click();
+    expect(resultDisplay.textContent).toBe("1+23");
+    digitButtons[3].click();
+    expect(resultDisplay.textContent).toBe("1+234");
+    digitButtons[4].click();
+    expect(resultDisplay.textContent).toBe("1+2345");
+    digitButtons[5].click();
+    expect(resultDisplay.textContent).toBe("1+23456");
+    digitButtons[6].click();
+    expect(resultDisplay.textContent).toBe("1+234567");
+    undoButton.click();
+    expect(resultDisplay.textContent).toBe("1+23456");     
+    undoButton.click();
+    expect(resultDisplay.textContent).toBe("1+2345");
+    undoButton.click();
+    expect(resultDisplay.textContent).toBe("1+234");      
+    undoButton.click();
+    expect(resultDisplay.textContent).toBe("1+23");      
+    undoButton.click();
+    expect(resultDisplay.textContent).toBe("1+2");      
+    undoButton.click();
+    expect(resultDisplay.textContent).toBe("1+");
+    });
+});
+
+describe("Undo pressed more times than second operand's length deletes second operand and stops at operator", () => {
+  test('', () => {
+    const resultDisplay = document.querySelector("#display-text");
+    const digitButtons = document.querySelectorAll(".digits");
+    const operatorButtons = document.querySelectorAll(".operator-button");
+    const getResultButton = document.querySelector("#get-result-button");
+    const clearButton = document.querySelector("#clear-button");
+    const negButton = document.querySelector("#negation-button");
+    const undoButton = document.querySelector("#undo");
+    digitButtons[0].click();
+    expect(resultDisplay.textContent).toBe("1");
+    operatorButtons[0].click();
+    expect(resultDisplay.textContent).toBe("1+");
+    digitButtons[1].click();
+    expect(resultDisplay.textContent).toBe("1+2");
+    digitButtons[2].click();
+    expect(resultDisplay.textContent).toBe("1+23");
+    digitButtons[3].click();
+    expect(resultDisplay.textContent).toBe("1+234");
+    undoButton.click();
+    expect(resultDisplay.textContent).toBe("1+23");
+    undoButton.click();
+    expect(resultDisplay.textContent).toBe("1+2");      
+    undoButton.click();
+    expect(resultDisplay.textContent).toBe("1+");      
+    undoButton.click();
+    expect(resultDisplay.textContent).toBe("1+");      
+    undoButton.click();
+    expect(resultDisplay.textContent).toBe("1+");
+    digitButtons[0].click();
+    expect(resultDisplay.textContent).toBe("1+1");
+    getResultButton.click();
+    expect(resultDisplay.textContent).toBe("2");
+  });
+});
+
+describe("Undo pressed more times than second operand's length deletes second operand and leaves cursor over operand position", () => {
+  test('', () => {
+    const resultDisplay = document.querySelector("#display-text");
+    const digitButtons = document.querySelectorAll(".digits");
+    const operatorButtons = document.querySelectorAll(".operator-button");
+    const getResultButton = document.querySelector("#get-result-button");
+    const clearButton = document.querySelector("#clear-button");
+    const negButton = document.querySelector("#negation-button");
+    const undoButton = document.querySelector("#undo");
+    digitButtons[0].click();
+    expect(resultDisplay.textContent).toBe("1");
+    operatorButtons[0].click();
+    expect(resultDisplay.textContent).toBe("1+");
+    digitButtons[1].click();
+    expect(resultDisplay.textContent).toBe("1+2");
+    digitButtons[2].click();
+    expect(resultDisplay.textContent).toBe("1+23");
+    digitButtons[3].click();
+    expect(resultDisplay.textContent).toBe("1+234");
+    undoButton.click();
+    expect(resultDisplay.textContent).toBe("1+23");
+    undoButton.click();
+    expect(resultDisplay.textContent).toBe("1+2");      
+    undoButton.click();
+    expect(resultDisplay.textContent).toBe("1+");      
+    undoButton.click();
+    expect(resultDisplay.textContent).toBe("1+");      
+    undoButton.click();
+    expect(resultDisplay.textContent).toBe("1+");
+    operatorButtons[1].click();
+    expect(resultDisplay.textContent).toBe("1-");
+    operatorButtons[2].click();
+    expect(resultDisplay.textContent).toBe("1*");
+    digitButtons[1].click();
+    expect(resultDisplay.textContent).toBe("1*2");
+    getResultButton.click();
+    expect(resultDisplay.textContent).toBe("2");
+  });
+});
+
+describe("Can update a digit 1 by keyboard", () => {
+  test('', () => {
+    const resultDisplay = document.querySelector("#display-text");
+    const digitButtons = document.querySelectorAll(".digits");
+    const operatorButtons = document.querySelectorAll(".operator-button");
+    const getResultButton = document.querySelector("#get-result-button");
+    const clearButton = document.querySelector("#clear-button");
+    const negButton = document.querySelector("#negation-button");
+    const undoButton = document.querySelector("#undo");
+    const press1KeyboardEvent = new KeyboardEvent("keydown", {key: "1"});
+    document.body.dispatchEvent(press1KeyboardEvent);
+    expect(resultDisplay.textContent).toBe("1");
+  });
+});
+
+describe("Can update all digits by keyboard", () => {
+  test('', () => {
+    const resultDisplay = document.querySelector("#display-text");
+    const digitButtons = document.querySelectorAll(".digits");
+    const operatorButtons = document.querySelectorAll(".operator-button");
+    const getResultButton = document.querySelector("#get-result-button");
+    const clearButton = document.querySelector("#clear-button");
+    const negButton = document.querySelector("#negation-button");
+    const undoButton = document.querySelector("#undo");
+    let expecterResult = "";
+    for (let i = 1; i < 10; i++){
+      let keyboardEvent = new KeyboardEvent("keydown", {key: String(i)});
+      document.body.dispatchEvent(keyboardEvent);
+      expect(resultDisplay.textContent).toBe(expecterResult += i);
+    }
+  });
+});
+
+describe("Can update operands and operator by keyboard", () => {
+  test('', () => {
+    const resultDisplay = document.querySelector("#display-text");
+    const digitButtons = document.querySelectorAll(".digits");
+    const operatorButtons = document.querySelectorAll(".operator-button");
+    const getResultButton = document.querySelector("#get-result-button");
+    const clearButton = document.querySelector("#clear-button");
+    const negButton = document.querySelector("#negation-button");
+    const undoButton = document.querySelector("#undo");
+    let keyboardEvent = new KeyboardEvent("keydown", {key: "1"});
+    document.body.dispatchEvent(keyboardEvent);
+    expect(resultDisplay.textContent).toBe("1");
+    keyboardEvent = new KeyboardEvent("keydown", {key: "+"});
+    document.body.dispatchEvent(keyboardEvent);
+    expect(resultDisplay.textContent).toBe("1+");
+    keyboardEvent = new KeyboardEvent("keydown", {key: "2"});
+    document.body.dispatchEvent(keyboardEvent);
+    expect(resultDisplay.textContent).toBe("1+2");
+  });
+});
+
+describe("Can update other operators by keyboard", () => {
+  test('', () => {
+    const resultDisplay = document.querySelector("#display-text");
+    const digitButtons = document.querySelectorAll(".digits");
+    const operatorButtons = document.querySelectorAll(".operator-button");
+    const getResultButton = document.querySelector("#get-result-button");
+    const clearButton = document.querySelector("#clear-button");
+    const negButton = document.querySelector("#negation-button");
+    const undoButton = document.querySelector("#undo");
+    let keyboardEvent = new KeyboardEvent("keydown", {key: "1"});
+    document.body.dispatchEvent(keyboardEvent);
+    expect(resultDisplay.textContent).toBe("1");
+    keyboardEvent = new KeyboardEvent("keydown", {key: "*"});
+    document.body.dispatchEvent(keyboardEvent);
+    expect(resultDisplay.textContent).toBe("1*");
+    keyboardEvent = new KeyboardEvent("keydown", {key: "2"});
+    document.body.dispatchEvent(keyboardEvent);
+    expect(resultDisplay.textContent).toBe("1*2");
+  });
+});
+
+describe("Can use = symbol as = button", () => {
+  test('', () => {
+    const resultDisplay = document.querySelector("#display-text");
+    const digitButtons = document.querySelectorAll(".digits");
+    const operatorButtons = document.querySelectorAll(".operator-button");
+    const getResultButton = document.querySelector("#get-result-button");
+    const clearButton = document.querySelector("#clear-button");
+    const negButton = document.querySelector("#negation-button");
+    const undoButton = document.querySelector("#undo");
+    let keyboardEvent = new KeyboardEvent("keydown", {key: "1"});
+    document.body.dispatchEvent(keyboardEvent);
+    expect(resultDisplay.textContent).toBe("1");
+    keyboardEvent = new KeyboardEvent("keydown", {key: "*"});
+    document.body.dispatchEvent(keyboardEvent);
+    expect(resultDisplay.textContent).toBe("1*");
+    keyboardEvent = new KeyboardEvent("keydown", {key: "2"});
+    document.body.dispatchEvent(keyboardEvent);
+    expect(resultDisplay.textContent).toBe("1*2");
+    keyboardEvent = new KeyboardEvent("keydown", {key: "="});
+    document.body.dispatchEvent(keyboardEvent);
+    expect(resultDisplay.textContent).toBe("2"); 
+  });
+});
+
+describe("Can use ^ symbol as ^ button", () => {
+  test('', () => {
+    const resultDisplay = document.querySelector("#display-text");
+    const digitButtons = document.querySelectorAll(".digits");
+    const operatorButtons = document.querySelectorAll(".operator-button");
+    const getResultButton = document.querySelector("#get-result-button");
+    const clearButton = document.querySelector("#clear-button");
+    const negButton = document.querySelector("#negation-button");
+    const undoButton = document.querySelector("#undo");
+    let keyboardEvent = new KeyboardEvent("keydown", {key: "2"});
+    document.body.dispatchEvent(keyboardEvent);
+    expect(resultDisplay.textContent).toBe("2");
+    keyboardEvent = new KeyboardEvent("keydown", {key: "Dead", code: "Quote"});
+    document.body.dispatchEvent(keyboardEvent);
+    expect(resultDisplay.textContent).toBe("2^");
+    keyboardEvent = new KeyboardEvent("keydown", {key: "2"});
+    document.body.dispatchEvent(keyboardEvent);
+    expect(resultDisplay.textContent).toBe("2^2");
+    keyboardEvent = new KeyboardEvent("keydown", {key: "="});
+    document.body.dispatchEvent(keyboardEvent);
+    expect(resultDisplay.textContent).toBe("4"); 
+  });
+});
+
+describe("Can use . symbol as . button", () => {
+  test('', () => {
+    const resultDisplay = document.querySelector("#display-text");
+    const digitButtons = document.querySelectorAll(".digits");
+    const operatorButtons = document.querySelectorAll(".operator-button");
+    const getResultButton = document.querySelector("#get-result-button");
+    const clearButton = document.querySelector("#clear-button");
+    const negButton = document.querySelector("#negation-button");
+    const undoButton = document.querySelector("#undo");
+    let keyboardEvent = new KeyboardEvent("keydown", {key: "2"});
+    document.body.dispatchEvent(keyboardEvent);
+    expect(resultDisplay.textContent).toBe("2");
+    keyboardEvent = new KeyboardEvent("keydown", {key: "."});
+    document.body.dispatchEvent(keyboardEvent);
+    expect(resultDisplay.textContent).toBe("2.");
+    keyboardEvent = new KeyboardEvent("keydown", {key: "2"});
+    document.body.dispatchEvent(keyboardEvent);
+    expect(resultDisplay.textContent).toBe("2.2");
+    keyboardEvent = new KeyboardEvent("keydown", {key: "*"});
+    document.body.dispatchEvent(keyboardEvent);
+    expect(resultDisplay.textContent).toBe("2.2*"); 
+    keyboardEvent = new KeyboardEvent("keydown", {key: "2"});
+    document.body.dispatchEvent(keyboardEvent);
+    expect(resultDisplay.textContent).toBe("2.2*2");
+    keyboardEvent = new KeyboardEvent("keydown", {key: "+"});
+    document.body.dispatchEvent(keyboardEvent);
+    expect(resultDisplay.textContent).toBe("4.4+");
+    keyboardEvent = new KeyboardEvent("keydown", {key: "2"});
+    document.body.dispatchEvent(keyboardEvent);
+    expect(resultDisplay.textContent).toBe("4.4+2");
+    keyboardEvent = new KeyboardEvent("keydown", {key: "="});
+    document.body.dispatchEvent(keyboardEvent);
+    expect(resultDisplay.textContent).toBe("6.4");
+  });
+});
+
+describe("Can use delete symbol as undo button", () => {
+  test('', () => {
+    const resultDisplay = document.querySelector("#display-text");
+    const digitButtons = document.querySelectorAll(".digits");
+    const operatorButtons = document.querySelectorAll(".operator-button");
+    const getResultButton = document.querySelector("#get-result-button");
+    const clearButton = document.querySelector("#clear-button");
+    const negButton = document.querySelector("#negation-button");
+    const undoButton = document.querySelector("#undo");
+    let keyboardEvent = new KeyboardEvent("keydown", {key: "2"});
+    document.body.dispatchEvent(keyboardEvent);
+    expect(resultDisplay.textContent).toBe("2");
+    keyboardEvent = new KeyboardEvent("keydown", {key: "."});
+    document.body.dispatchEvent(keyboardEvent);
+    expect(resultDisplay.textContent).toBe("2.");
+    keyboardEvent = new KeyboardEvent("keydown", {key: "2"});
+    document.body.dispatchEvent(keyboardEvent);
+    expect(resultDisplay.textContent).toBe("2.2");
+    keyboardEvent = new KeyboardEvent("keydown", {key: "Backspace"});
+    document.body.dispatchEvent(keyboardEvent);
+    expect(resultDisplay.textContent).toBe("2."); 
+    keyboardEvent = new KeyboardEvent("keydown", {key: "Backspace"});
+    document.body.dispatchEvent(keyboardEvent);
+    expect(resultDisplay.textContent).toBe("2");
+    keyboardEvent = new KeyboardEvent("keydown", {key: "Backspace"});
+    document.body.dispatchEvent(keyboardEvent);
+    expect(resultDisplay.textContent).toBe("");
+    keyboardEvent = new KeyboardEvent("keydown", {key: "Backspace"});
+    document.body.dispatchEvent(keyboardEvent);
+    expect(resultDisplay.textContent).toBe("");
+  });
 });

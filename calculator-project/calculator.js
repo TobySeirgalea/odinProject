@@ -1,3 +1,11 @@
+function isDigit(aString){
+    return "0123456789".includes(aString);
+}
+
+function isOperator(aString){
+    return "+-*/%^".includes(aString);
+}
+
 function anyOperandEndWithPoint() {
     return firstOperand.at(-1) == "." || secondOperand.at(-1) == ".";
 }
@@ -118,25 +126,28 @@ function operate(operator, operand1, operand2){
     }
 }
 
-function updateDigit(event){
+function digitButtonHandler(event){
     const digit = event.target.textContent;
-    if (resultDisplay.textContent == "Ingrese una operación:" || displayingResult){
+    return updateDigit(digit);
+}
+
+function updateDigit(digit) {
+    if (resultDisplay.textContent == "Ingrese una operación:" || displayingResult) {
         cleanResultDisplay();
         displayingResult = false;
     }
-    if (currentOperator != ""){
+    if (currentOperator != "") {
         secondOperand += digit;
         cursor = secondOperandPosition;
     }
-    else{
+    else {
         firstOperand += digit;
         cursor = firstOperandPosition;
     }
     return updateDisplay();
 }
 
-function updateOperator(event){
-    currentOperator = event.target.textContent;
+function updateOperator(anOperator){
     if (operationReady()){
         firstOperand = operate(currentOperator, firstOperand, secondOperand);
         secondOperand = "";
@@ -147,7 +158,13 @@ function updateOperator(event){
     else if (anyOperandEndWithPoint()){
         return throwErrorMessage(agregarOperandosDespuesDePuntoErrorMessage);    
     }
+    currentOperator = anOperator;
+    cursor = operatorPosition;
     return updateDisplay();
+}
+
+function operatorButtonHandler(event){
+    return updateOperator(event.target.textContent);
 }
 
 function updateResult(event){
@@ -174,6 +191,43 @@ function usePoint(event){
     return updateDisplay();
 }
 
+function undoLastDigitUpdate(event){
+    if (cursor == firstOperandPosition){
+        firstOperand = firstOperand.slice(0, firstOperand.length - 1);
+        updateDisplay();
+    }
+    else if (cursor == secondOperandPosition){
+        secondOperand = secondOperand.slice(0, secondOperand.length - 1);
+        updateDisplay();
+    }
+    else if (cursor == operatorPosition){
+    }
+}
+
+function getSymbol(event){
+    if (event.code == "Quote") return "^";
+    return event.key;
+}
+
+function keyboardManager(event){
+    const inputSymbol = getSymbol(event);
+    if (isDigit(inputSymbol)){
+        updateDigit(inputSymbol);  
+    } 
+    else if (isOperator(inputSymbol)) {
+        updateOperator(inputSymbol);
+    }
+    else if (inputSymbol == "="){
+        updateResult(event);
+    }
+    else if (inputSymbol == "."){
+        usePoint(event);
+    }
+    else if (inputSymbol == "Backspace"){
+        undoLastDigitUpdate(event);
+    }
+}
+
 const resultDisplay = document.querySelector("#display-text");
 const getResultButton = document.querySelector("#get-result-button");
 const operatorButtons = document.querySelectorAll(".operator-button");
@@ -181,6 +235,7 @@ const digitButtons = document.querySelectorAll(".digits");
 const clearButton = document.querySelector("#clear-button");
 const negButton = document.querySelector("#negation-button");
 const pointButton = document.querySelector("#point");
+const undoButton = document.querySelector("#undo");
 
 let displayingResult = false;
 let firstOperand = "";
@@ -195,9 +250,9 @@ const utilizarPuntoMasDeUnaVezErrorMessage = `Error: No se permite usar operador
 const usarPuntoSinParteEnteraErrorMessage = "Error: No se permite agregar un punto sin antes ingresar una parte entera";
 const agregarOperandosDespuesDePuntoErrorMessage = `Error: Debe introducir digitos en la parte decimal si utiliza ".""`;
 
-operatorButtons.forEach(operatorButton => (operatorButton.addEventListener("click", updateOperator)));
+operatorButtons.forEach(operatorButton => (operatorButton.addEventListener("click", operatorButtonHandler)));
 
-digitButtons.forEach(digitButton => (digitButton.addEventListener("click", updateDigit)))
+digitButtons.forEach(digitButton => (digitButton.addEventListener("click", digitButtonHandler)))
 
 getResultButton.addEventListener("click", updateResult);
 
@@ -206,3 +261,8 @@ clearButton.addEventListener("click", clearOperation);
 negButton.addEventListener("click", convertToNegativeCurrentOperand);
     
 pointButton.addEventListener("click", usePoint);
+
+undoButton.addEventListener("click", undoLastDigitUpdate);
+
+document.body.addEventListener("keydown", keyboardManager);
+

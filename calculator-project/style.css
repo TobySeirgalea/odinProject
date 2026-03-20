@@ -1,0 +1,79 @@
+button{
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    text-align: center;
+    background-color: rgb(80, 80, 80);
+    color: aliceblue;
+    border-radius: 7px;
+    margin: 3px;
+    width: 80px;
+    height: 50px;
+}
+
+footer{
+    text-align: center;
+    color: rgb(172, 172, 172);
+    background-color: rgb(65, 65, 65);
+    border-radius: 10px;
+    margin-top: 150px;
+}
+
+body{
+    background-color: rgb(37, 37, 37);
+    height: 100%;   
+    padding: 20px 0px;
+}
+
+#keyboard{
+    margin: auto;
+    padding: 2px;    
+    width: 450px;
+    height: 300px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    border: 2px dotted rgb(63, 63, 63);
+}
+
+#get-result-button{
+    background-color: orangered;
+}
+
+#display{
+    background-color: rgb(78, 78, 78);
+    color: aliceblue;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: 500;
+    padding: 7px;
+    border-radius: 7px;
+    text-align: center;
+    margin: 20px auto;
+    width: 400px;
+}
+
+
+body, .operators, .column, #modifiers, #digits, #keyboard{
+    display: flex;
+}
+
+
+#digits{
+    flex-wrap: wrap;
+    width: 260px;
+    height: 225px;
+}
+
+body, .column{
+    flex-direction: column;
+}
+
+#digits, .operators, #modifiers{
+    justify-content: center;
+    align-items: flex-start;
+}
+
+#title{
+    color: aliceblue;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    text-align: center;
+}

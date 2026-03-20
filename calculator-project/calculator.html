@@ -8,30 +8,55 @@
     <script src="calculator.js" defer></script>
 </head>
 <body>
-    <div id="display">
-        <p id="display-text">Ingrese una operación:</p>
+    <div id="title">
+        <h1>Calculator</h1>
     </div>
-    <div id="keyboard">
-        <button class="operator-button">+</button>
-        <button class="operator-button">-</button>
-        <button class="operator-button">*</button>
-        <button class="operator-button">/</button>
-        <button class="operator-button">^</button>
-        <button class="operator-button">%</button>
-        <button id="negation-button">Neg</button>
-        <button id="get-result-button">=</button>
-        <button id="clear-button">Clear</button>
-        <button class="digits">1</button>
-        <button class="digits">2</button>
-        <button class="digits">3</button>
-        <button class="digits">4</button>
-        <button class="digits">5</button>
-        <button class="digits">6</button>
-        <button class="digits">7</button>
-        <button class="digits">8</button>
-        <button class="digits">9</button>
-        <button class="digits">0</button>
-        <button id="point">.</button>
+    <div id="calculator">
+        <div id="display">
+            <p id="display-text">Ingrese una operación:</p>
+        </div>
+        <div id="keyboard">
+            <div id="digits">
+                <div class="column">
+                    <button class="digits">1</button>
+                    <button class="digits">4</button>
+                    <button class="digits">7</button>
+                </div>
+                <div class="column">
+                    <button class="digits">2</button>
+                    <button class="digits">5</button>
+                    <button class="digits">8</button>
+                    <button class="digits">0</button>
+                </div>
+                <div class="column">
+                    <button class="digits">3</button>
+                    <button class="digits">6</button>                    
+                    <button class="digits">9</button>
+                </div>
+            </div>    
+            <div class="operators">
+                <div class="column">
+                    <button class="operator-button">+</button>
+                    <button class="operator-button">*</button>
+                    <button class="operator-button">^</button>            
+                    <button id="point">.</button>
+                </div>
+                <div class="column">
+                    <button class="operator-button">-</button>
+                    <button class="operator-button">/</button>
+                    <button class="operator-button">%</button>
+                    <button id="get-result-button">=</button>
+                </div>
+            </div>
+            <div id="modifiers">
+                    <button id="negation-button">Neg</button>
+                    <button id="undo">Undo</button>        
+                    <button id="clear-button">Clear</button>
+            </div>
+        </div>
     </div>
+    <footer>
+        Calculator project for "The Odin Project"
+    </footer>
 </body>
 </html>
