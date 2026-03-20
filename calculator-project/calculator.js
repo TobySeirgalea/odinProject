@@ -1,6 +1,99 @@
+function anyOperandEndWithPoint() {
+    return firstOperand.at(-1) == "." || secondOperand.at(-1) == ".";
+}
+
+function operationReady() {
+    return firstOperand != "" && currentOperator != "" && secondOperand != "";
+}
+
+function sinParteEnteraEnOperandoActual() {
+    return (cursor == firstOperandPosition && firstOperand == "") || (cursor == secondOperandPosition && secondOperand == "");
+}
+
+function puntoUsadoPreviamente() {
+    return (cursor == firstOperandPosition && firstOperand.includes(".")) || (cursor == secondOperandPosition && secondOperand.includes("."));
+}
+
+function updateDisplay(){
+    return resultDisplay.textContent = firstOperand + currentOperator + secondOperand;
+}
+
+function throwErrorMessage(errorMessage){
+    return resultDisplay.textContent = errorMessage;
+}
+
+function cleanOperandsAndOperator() {
+    firstOperand = "";
+    currentOperator = "";
+    secondOperand = "";
+}
+
+function clearOperation(){
+    cleanResultDisplay();
+    cleanOperandsAndOperator();
+}
+
+function cleanResultDisplay() {
+    return resultDisplay.textContent = "";
+}
+
+function getNumber(operandString){
+    if (operandString[0] == "("){
+        return (-1)*Number(operandString.slice(2, operandString.length -1));
+    }
+    return Number(operandString);
+}
+
+function applyRuleOfSigns(){    
+    if (currentOperator == "+" && secondOperand[0] == "-") {
+        secondOperand = secondOperand.slice(1);
+    }
+    else if (currentOperator == "+" && secondOperand[0] != "-") {
+        currentOperator = "-";
+    }
+    else if (currentOperator == "-" && secondOperand[0] != "-") {
+        currentOperator = "+";
+    }
+}
+
+function applyParentheses(){
+    if (secondOperand[0] == "(") {
+        secondOperand = secondOperand.slice(2, secondOperand.length - 1);
+    }
+    else if (secondOperand[0] != "-") {
+        secondOperand = `(-${secondOperand})`;
+    }
+}
+
+function convertToNegativeSecondOperand() {
+    if (currentOperator == "+" || currentOperator == "-"){
+        return applyRuleOfSigns();
+    }
+    return applyParentheses();        
+}
+
+function convertToNegativeFirstOperand() {
+    if (firstOperand[0] == "-"){
+        firstOperand = firstOperand.slice(1);
+    } 
+    else{
+        firstOperand = `-${firstOperand}`;
+    } 
+}
+
+function convertToNegativeCurrentOperand(){
+    if (cursor == firstOperandPosition){
+        convertToNegativeFirstOperand();
+    }   
+    else if (cursor == secondOperandPosition){
+        convertToNegativeSecondOperand();
+    } 
+    return updateDisplay();
+}
+
 function operate(operator, operand1, operand2){
-    const op1 = Number(operand1);
-    const op2 = Number(operand2);
+    const op1 = getNumber(operand1);
+    const op2 = getNumber(operand2);
     switch(operator){
         case "+":
             return op1 + op2;
@@ -12,106 +105,73 @@ function operate(operator, operand1, operand2){
             if (op2 != 0){
                 return op1 / op2;
             }
-            return "Error división por cero";
+            return "Error: División por cero, presione clear para iniciar otra operación";
         case "^":
             return op1 ** op2;
         case "%":
             if (op2 != 0){
                 return op1 % op2;
             }
-            return "Error división por cero";
+            return "Error: División por cero, presione clear para iniciar otra operación";
         default:
             return "Operador inválido/No soportado";
     }
 }
 
-function isDigit(symbol){
-    return ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"].includes(symbol);
-}
-
-function isOperator(symbol){
-    return ["+", "-", "*", "^", "/", "%"].includes(symbol);
-}
-
-function computeResult(event){
-    if (currentOperation.operand0 != "" && currentOperation.operator != "" && currentOperation.operand1 != ""){
-        currentOperation.result = operate(currentOperation.operator, currentOperation.operand0, currentOperation.operand1);
-        currentOperation.operand0 = currentOperation.result;
-        currentOperation.result = "";
-        currentOperation.operand1 = "";
-        currentOperation.operator = "";
-        cursor = operatorPosition;
-        updateDisplay();
+function updateDigit(event){
+    const digit = event.target.textContent;
+    if (resultDisplay.textContent == "Ingrese una operación:" || displayingResult){
+        cleanResultDisplay();
+        displayingResult = false;
     }
-    else{
-        resultDisplay.textContent = "Error, operación inválida";
-    }
-}
-
-function updateDisplay(){
-    resultDisplay.textContent = "";
-    for (let field of ["operand0", "operator", "operand1"]){
-        if (currentOperation[field] != undefined){
-            resultDisplay.textContent += currentOperation[field];
-        }
-    }    
-}
-
-function updateOperationWithDigit(aDigit){
-    if (cursor == firstOperandPosition){
-        currentOperation.operand0 += aDigit; 
-    }
-    else if (cursor == operatorPosition){
-        currentOperation.operand1 += aDigit;
+    if (currentOperator != ""){
+        secondOperand += digit;
         cursor = secondOperandPosition;
     }
-}
-
-function updateOperationWithOperator(operator){
-    if (cursor == operatorPosition){
-        currentOperation.operator = operator;
-    }
-    else if(cursor == firstOperandPosition || cursor == secondOperandPosition){
-        if (cursor == secondOperandPosition){
-            computeResult();
-        }
-        currentOperation.operator = operator;
-        cursor = operatorPosition;
-    }
     else{
-        let errorMessage = "Solo puede reemplazar un operando con otro válido o un operador con otro válido";
-        return resultDisplay.textContent= errorMessage;
-    }
-
-}
-
-function negateOperand(){
-    if (cursor == firstOperandPosition && currentOperation.operand0[0] != "-"){
-        currentOperation.operand0 = `-${currentOperation.operand0}`;
-    }
-    else if (cursor == secondOperandPosition && currentOperation.operand1[0] != "-"){
-        currentOperation.operand1 = `-${currentOperation.operand1}`;
-    }
-}
-
-function updateInput(event){
-    const userInput = event.target.textContent;
-    if (isDigit(userInput)){
-        updateOperationWithDigit(userInput);
-    }
-    else if (isOperator(userInput)){
-        updateOperationWithOperator(userInput);
-    }
-    else if (userInput == "Neg" && (cursor == firstOperandPosition || cursor == secondOperandPosition)){
-        negateOperand();
+        firstOperand += digit;
+        cursor = firstOperandPosition;
     }
     return updateDisplay();
 }
 
-function clear(){
-    currentOperation = {operand0: "", operator: "", operand1: "", result: undefined};
-    resultDisplay.textContent = "Ingrese una operación:";
-    cursor = firstOperandPosition;
+function updateOperator(event){
+    currentOperator = event.target.textContent;
+    if (operationReady()){
+        firstOperand = operate(currentOperator, firstOperand, secondOperand);
+        secondOperand = "";
+    }
+    else if (displayingResult){
+        firstOperand = resultDisplay.textContent;
+    }
+    else if (anyOperandEndWithPoint()){
+        return throwErrorMessage(agregarOperandosDespuesDePuntoErrorMessage);    
+    }
+    return updateDisplay();
+}
+
+function updateResult(event){
+    if (operationReady()){
+        resultDisplay.textContent = operate(currentOperator, firstOperand, secondOperand);
+        displayingResult = true;    
+        cleanOperandsAndOperator();
+    }
+}
+
+function usePoint(event){
+    if (puntoUsadoPreviamente()){
+        return throwErrorMessage(utilizarPuntoMasDeUnaVezErrorMessage);
+    }
+    if (sinParteEnteraEnOperandoActual()){
+        return throwErrorMessage(usarPuntoSinParteEnteraErrorMessage);
+    }
+    if (cursor == firstOperandPosition){
+        firstOperand += ".";
+    }
+    else if (cursor == secondOperandPosition){
+        secondOperand += ".";
+    }
+    return updateDisplay();
 }
 
 const resultDisplay = document.querySelector("#display-text");
@@ -119,17 +179,30 @@ const getResultButton = document.querySelector("#get-result-button");
 const operatorButtons = document.querySelectorAll(".operator-button");
 const digitButtons = document.querySelectorAll(".digits");
 const clearButton = document.querySelector("#clear-button");
-const firstOperandPosition = 0;
-const secondOperandPosition = 2;
-const operatorPosition = 1;
+const negButton = document.querySelector("#negation-button");
+const pointButton = document.querySelector("#point");
 
-let currentOperation = {operand0: "", operator: "", operand1: "", result: undefined};
+let displayingResult = false;
+let firstOperand = "";
+let secondOperand = "";
+let currentOperator = "";
+const firstOperandPosition = 0;
+const operatorPosition = 1;
+const secondOperandPosition = 2;
 let cursor = firstOperandPosition;
 
-clearButton.addEventListener("click", clear);
+const utilizarPuntoMasDeUnaVezErrorMessage = `Error: No se permite usar operador punto más de una vez en un operando`;
+const usarPuntoSinParteEnteraErrorMessage = "Error: No se permite agregar un punto sin antes ingresar una parte entera";
+const agregarOperandosDespuesDePuntoErrorMessage = `Error: Debe introducir digitos en la parte decimal si utiliza ".""`;
 
-operatorButtons.forEach(operatorButton => (operatorButton.addEventListener("click", updateInput)));
+operatorButtons.forEach(operatorButton => (operatorButton.addEventListener("click", updateOperator)));
 
-digitButtons.forEach(digitButton => (digitButton.addEventListener("click", updateInput)))
+digitButtons.forEach(digitButton => (digitButton.addEventListener("click", updateDigit)))
 
-getResultButton.addEventListener("click", computeResult);
+getResultButton.addEventListener("click", updateResult);
+
+clearButton.addEventListener("click", clearOperation);
+
+negButton.addEventListener("click", convertToNegativeCurrentOperand);
+    
+pointButton.addEventListener("click", usePoint);
