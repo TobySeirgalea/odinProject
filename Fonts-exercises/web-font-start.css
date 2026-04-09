@@ -1,0 +1,84 @@
+/* General setup */
+
+html {
+  font-size: 10px;
+  margin: 0;
+  font-family: sans-serif;
+}
+
+body {
+  width: 80%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Typography */
+
+h1, h2 {
+  font-family: 'Great Vibes';
+}
+
+h1 {
+  font-size: 3.2rem;
+}
+
+h2 {
+  font-size: 2.4rem;
+}
+
+p {
+  font-size: 1.4rem;
+  line-height: 1.6;
+  word-spacing: 0.6rem;
+  font-family: 'Roboto';
+}
+
+/*Usar fuentes descargadas:
+1) Te descargás el archivo .zip de la fuente.
+2) Aplicás comando unzip
+3) Subís el (.ttf|.otf|.woff|.woff2) a transfonter.org 
+4) Le das a convert y lo descargás
+5) Aplicás unzip al archivo. 
+6) Podés abrir el demo.html para ver una preview
+7) Abrís el stylesheet.css y te copías los @font-face a tu archivo .css
+8) La usás con font-famili: 'nombre_fuente';
+
+*/
+@font-face {
+    font-family: 'Great Vibes';
+    src: url('./fonts/GreatVibes-Regular.woff2') format('woff2'),
+        url('./fonts/GreatVibes-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('./fonts/Roboto-Italic.woff2') format('woff2'),
+        url('./fonts/Roboto-Italic.woff') format('woff');
+    font-weight: normal;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('./fonts/Roboto-Regular.woff2') format('woff2'),
+        url('./fonts/Roboto-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+
+.caveat {
+  font-family: "Caveat", cursive;
+  font-optical-sizing: auto;
+  font-weight: 1rem;
+  font-style: normal;
+}
+
+#snd{
+  font-family: 'Caveat';
+}
