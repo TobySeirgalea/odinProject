@@ -1,0 +1,78 @@
+select {
+  appearance: base-select;
+}
+
+select {
+  border: 2px solid #dddddd;
+  border-radius: 8px;
+  background: #eeeeee;
+  width: 200px;
+  height: 130px;
+}
+
+option {
+  background: #eeeeee;
+  padding: 10px;
+  height: 40px;
+  outline: none;
+}
+
+option:nth-of-type(odd) {
+  background: white;
+}
+
+option::checkmark {
+  order: 1;
+  margin-left: auto;
+  content: "☑️";
+}
+
+option:checked {
+  font-weight: bold;
+}
+
+option:hover,
+option:focus {
+  background: plum;
+}
+
+select {
+  height: 44px;
+  overflow: hidden;
+  transition: 0.6s height;
+  interpolate-size: allow-keywords;
+}
+
+select:hover,
+select:has(option:focus) {
+  height: fit-content;
+}
+
+p {
+  width: 90%;
+  margin: 0 auto;
+}
+
+select {
+  width: 100%;
+  height: fit-content;
+}
+
+.wrapper {
+  display: flex;
+  width: fit-content;
+}
+
+option {
+  padding: 10px 30px;
+  position: relative;
+}
+
+option::checkmark {
+  position: absolute;
+  top: -2px;
+  left: 2px;
+  font-size: 1.5rem;
+  color: red;
+  text-shadow: 1px 1px 1px black;
+}

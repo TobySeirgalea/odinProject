@@ -1,0 +1,42 @@
+input:required {
+  border: 2px solid;
+}
+
+input:optional {
+  border: 2px dashed;
+}
+
+fieldset > div { 
+margin-bottom: 20px;
+  display: flex;
+  flex-flow: row wrap; /*Así los hijos se ubican uno al lado del otro y si no entran uno va abajo porque label y input toman 100% width por defecto*/
+}
+
+input + span {
+  position: relative;
+}
+
+input:required + span::after {
+  font-size: 0.7rem;
+  position: absolute;
+  content: "required";
+  color: white;
+  background-color: black;
+  padding: 5px 10px;
+  top: -26px;
+  left: -70px;
+}
+
+input:invalid {
+  border: 2px solid red;
+}
+
+input:invalid + span::before {
+  content: "✖";
+  color: red;
+}
+
+input:valid + span::before {
+  content: "✓";
+  color: green;
+}

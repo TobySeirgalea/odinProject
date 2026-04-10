@@ -1,0 +1,79 @@
+select{
+    appearance: base-select;
+}
+.wrapper {
+  border: 2px solid #dddddd;
+  border-radius: 8px;
+  background: #dddddd;
+  width: 250px;
+}
+.filter input {
+  display: block;
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #bbbbbb;
+  width: 95%;
+  margin: 8px auto;
+}
+
+.options {
+  padding: 0 5px;
+  background: #dddddd;
+}
+
+select {
+  height: 200px;
+  overflow-y: scroll;
+  width: 100%;
+  border: 1px solid #bbbbbb;
+}
+
+.edit {
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+option {
+  background: #eeeeee;
+  padding: 10px;
+}
+
+option:nth-of-type(odd) {
+  background: white;
+}
+
+option:checked {
+  font-weight: bold;
+}
+
+option:hover,
+option:focus {
+  background: plum;
+}
+input,
+option,
+a {
+  outline: none;
+}
+
+input:hover,
+input:focus {
+  border: 1px solid #999999;
+  background: #eeeeff;
+}
+
+.edit a {
+  color: #333333;
+}
+
+a:hover,
+a:focus {
+  outline: 2px dotted #666666;
+}
+option::checkmark {
+  order: 1;
+  margin-left: auto;
+  content: "☑️";
+}
