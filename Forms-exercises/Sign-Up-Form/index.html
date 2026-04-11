@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+    <title>Sign-up form</title>
+</head>
+<body>
+    <div class="side-header">
+        <div class="title-container">
+            <h1>odin</h1>
+            <img src="./images/odin-logo.png" alt="The Odin Project logo" id="logo">
+        </div>
+            <p class="image-credit">
+                Foto de <a href="https://unsplash.com/es/@haliewestphoto?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Halie West</a> en <a href="https://unsplash.com/es/fotos/planta-de-hoja-verde-en-fotografia-de-primer-plano-25xggax4bSA?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>
+            </p>
+    </div>
+    <div class="main-content">
+        <p>
+            This is not a real online service! you need something like this in your life to help you realize your deepest dreams. <br>
+            Sign up <em>now</em> to get started.
+        </p> 
+        
+
+        <p>
+            You <em>know</em> you want to.
+        </p>
+
+        <div class="form-container">
+            <form action="">
+                <legend>Let's do this</legend>
+                <div class="form-inputs">
+                    <div class="form-field">
+                        <label for="first-name-input">FIRST NAME (*)
+                        </label>
+                        <input type="text" name="first-name" id="first-name-input" required maxlength="30" autofocus autocomplete="given-name">
+                        <span class="validation-message" id="name-validation"></span>
+                    </div>
+                    <div class="form-field">    
+                        <label for="last-name-input">LAST NAME (*)
+                        </label>
+                        <input type="text" name="last-name" id="last-name-input" required maxlength="30" autocomplete="family-name">
+                        <span class="validation-message" id="name-validation"></span>
+                    </div>
+                    <div class="form-field">
+                        <label for="email-input">EMAIL
+                        </label>
+                        <input type="email" name="email" id="email-input" autocomplete="email">
+                        <span class="validation-message" id="name-validation"></span>
+                    </div>
+                    <div class="form-field">
+                        <label for="telephone-input">PHONE NUMBER
+                        </label>
+                        <input type="tel" name="telephone" id="telephone-input" autocomplete="tel">
+                        <span class="validation-message" id="name-validation"></span>
+                    </div>
+                    <div class="password-section">
+                        <div class="password-inputs">
+                            <div class="form-field">
+                                <label for="password-input">PASSWORD (*)
+                                </label>
+                                <input type="password" name="password" id="password-input" required minlength="8" maxlength="50" autocomplete="off">
+                                <span class="validation-message" id="name-validation"></span>
+                            </div>
+                            <div class="form-field">
+                                <label for="confirm-password-input">CONFIRM PASSWORD (*)
+                                </label>
+                                <input type="password" name="confirmed-password" id="confirm-password-input" required autocomplete="off">
+                                <span class="validation-message" id="name-validation"></span>
+                            </div>
+                        </div>
+                        <ul class="password-constraints">
+                            <li class="password-constraint">● At least 8 characters</li>
+                            <li class="password-constraint">● At least 1 lowercase character</li>
+                            <li class="password-constraint">● At least 1 uppercase character</li>
+                            <li class="password-constraint">● At least 1 number</li>
+                            <li class="password-constraint">● At least 1 special character</li>
+                        </ul>
+                    </div>
+                </div>
+            </form>
+        </div>
+       <div class="submit-section">
+            <button type="submit">Create Account</button>
+            <p>
+                Already have an account? <a href="">Log in</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

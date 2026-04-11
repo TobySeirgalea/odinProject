@@ -1,0 +1,213 @@
+@font-face {
+    font-family: 'Norse';
+    src: url('./Fonts/Norse.woff2') format('woff2'),
+        url('./Fonts/Norse.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Norse';
+    src: url('./Fonts/Norse-Bold.woff2') format('woff2'),
+        url('./Fonts/Norse-Bold.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('./Fonts/Roboto-Regular.woff2') format('woff2'),
+        url('./Fonts/Roboto-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+body{
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
+
+.side-header{
+    background: green url("./images/halie-west-25xggax4bSA-unsplash.jpg");
+    background-size: cover;
+    width: 30vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.title-container{
+    margin-top: 180px;
+    padding: 10px 0px;
+}
+
+.title-container h1{
+    font-family: "Norse";
+    font-size: 6rem;
+    color: white;
+    margin: 0;
+}
+
+#logo{
+    height: 7rem;
+}
+
+.title-container{
+    display: flex;
+    flex-direction: row-reverse;
+    background-color: rgba(0, 0, 0, 0.500);
+    justify-content: center;
+    align-items: center;
+    
+}
+
+.image-credit, .image-credit a{
+    font-size: 10px;
+    color: white;
+}
+
+.image-credit{
+    text-align: center;
+}
+
+
+.main-content p{
+    width: 52%;
+    margin: 2% 5%;
+    box-sizing: border-box;
+    font-size: 20px;
+    font-weight: 600;
+    font-family: inherit;
+}
+
+.form-container{
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    
+}
+
+.main-content{
+    width: 70vw;
+    padding: 5% 0%;
+    background-color: whitesmoke;
+    font-family: 'Roboto';
+}
+.form-container form{
+    background-color: white;
+    box-shadow: 2px 2px 5px rgba(124, 124, 124, 0.61);
+    margin: 5% 0%;
+    padding-right: 20%;
+    padding-left: 5%;
+    padding-bottom: 5%;
+    color: rgb(36, 36, 36);
+    font-family: inherit;
+
+}
+
+
+.form-container .form-inputs{
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 5px;
+}
+
+.form-container input{
+    min-width: 250px;
+    height: 20px;
+    border-radius: 5px;
+    border: 1px solid #E5E7EB;
+}
+
+.form-container input:user-invalid{
+    border: 1px solid red;
+    margin-bottom: 3px;
+}
+
+.form-container .form-field input:user-invalid + span::after{
+    content: "🚩 Invalid";
+    color: red;
+}
+
+.form-container .form-field input:user-valid + span::after{
+    content: "✅ Valid";
+    color: green;
+}
+
+.password-section{
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.password-section .password-inputs{
+    margin-right: 10%;
+}
+
+.password-constraints{
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    margin-left: 0px;
+    padding: 0;
+    justify-self: flex-end;
+}
+
+.password-constraints .correct{
+    color: green;
+}
+
+.password-constraints li{
+    color: grey;
+}
+
+
+
+.form-container input:focus{
+    border: 1px solid blue;
+    box-shadow: 1px 1px 8px blue;
+}
+
+.form-container .form-field{
+    display: flex;
+    flex-direction: column;
+    margin-right: 10%;
+    margin-top: 10px;
+}
+
+.form-container .form-field label{
+    font-size: 12px;
+    font-family: inherit;
+}
+
+.form-container legend{
+    margin: 20px 0px 0px 0px;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.submit-section p{
+    font-size: 12px;
+    font-weight: 500;
+}
+
+a{
+    text-decoration: none;
+}
+
+.submit-section a{
+    color: #596D48;
+}
+
+.submit-section button{
+    background-color: #596D48;
+    border: 0;
+    padding: 15px 50px;
+    margin-left: 5%;
+    border-radius: 7px;
+    color: white;
+}
