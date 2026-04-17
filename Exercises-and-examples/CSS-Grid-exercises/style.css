@@ -1,4 +1,51 @@
-.container{
-    display: grid;
-    grid-template: 50px 50px 50px / 50px 50px;
+.container {
+  display: grid; /*inline-grid hace que sea elemento inline, es decir que no ocupe toda la pantalla en su extensión*/
+
+  
+  /*Con estos elegís los tamaños de las filas y columnas, además podés ponerle nombre a cada una para luego ubicar un elemento en un lugar específico como .first. Una puede tener varios nombres y su hay dos con el mismo nos podemos referir a esa con el número de las del mismo nombre que es esta*/
+  grid-template-columns: [first-col-start] 50px [first-col-end second-col-start] 50px [second-col-end];
+  
+  grid-template-rows: [first-row-start] 50px [first-row-end second-row-start] 50px [second-row-end] 50px;
+  
+  /*Especificás los valores de separación de las líneas de rows y columns para los elementos que se añadan dinámicamente que superen la cantidad que tenemos en grid-template-(columns|rows)*/
+  grid-auto-rows: 50px;
+  grid-auto-columns: 50px;
+
+  grid-template-areas: 
+    "left-sidebar ."
+    "left-sidebar second"
+    "third        fourth";
+    /*Ponés un . cuando te da igual cual se ubique ahí, si hay elemento de sobra los va a ubicar ahí, sino quedará vacío*/
+    
+  column-gap: 50px;
+  row-gap: 50px;
+}
+
+div{
+    border: 2px solid orangered;
+}
+
+.first{
+    background-color: yellow;
+
+    /*Podemos definirle una celda específica del grid a un elemento
+    grid-column-start: second-col-start;
+    grid-row-start: second-row-start;
+    */
+
+
+    /*Definimos un nombre para las celdas del grid que ocupará este elemento*/
+    grid-area: left-sidebar;
+}
+
+.second{
+    grid-area: second;
+}
+
+.third{
+    grid-area: third;
+}
+
+.fourth{
+    grid-area: fourth;
 }
