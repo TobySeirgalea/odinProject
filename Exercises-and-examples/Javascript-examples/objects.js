@@ -69,5 +69,19 @@ console.log(brand()); // undefined
 
 //You get undefined instead of "Honda" because when you call a method without specifying its object, JavaScript sets this to the global object in non-strict mode and undefined in the strict mode. To fix this issue, you can use the bind() method of the Function.prototype object. The bind() method creates a new function whose the this keyword is set to a specified value
 
-let brand = car.getBrand.bind(car);
+brand = car.getBrand.bind(car);
 console.log(brand()); // Honda
+
+let globalAge = 23;
+
+function printAge(age){
+  var varAge = 34;
+
+  if (age > 0){
+    const constAge = age * 2;
+    console.log(constAge);
+  }
+//  console.log(constAge);
+}
+printAge(globalAge);
+//console.log(varAge);

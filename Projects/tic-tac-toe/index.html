@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <script src="./script.js" defer></script>
+    <title>Tic Tac Toe</title>
+</head>
+<body>
+    <header>
+        <h1>Tic Tac Toe</h1>
+        <div class="buttons">
+            <button class="newGameButton roundBorders">New game</button>
+        </div>
+    </header>
+    <div class="">
+        <dialog id="gameParametersDialog">
+            <form action="">
+                <h2>Introduce game parameters</h2>
+                <label for="dimensionsInput">Gameboard dimensions:</label>
+                <input type="number" id="dimensionsInput" min="1" max="10" step="1" required class="roundBorders formElements">
+                <label for="selectSymbol">Select your symbol:</label>
+                <select name="userSymbol" id="selectSymbol" required class="roundBorders formElements">
+                    <option value="X">X</option>
+                    <option value="O">O</option>
+                </select>
+                <button type="submit" id="dialogSubmitButton" class="roundBorders formElements">Ready!</button>
+            </form>
+        </dialog>
+    </div>
+
+
+
+</body>
+</html>
