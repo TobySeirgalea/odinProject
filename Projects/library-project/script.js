@@ -1,87 +1,156 @@
-let myLibrary = [];
 const dialog        = document.getElementById("addBookDialog");
 const addBookButton = document.getElementById("addBookButton");
 const sendButton    = document.getElementById("sendFormButton");
 const cancelButton  = document.getElementById("cancelFormButton");
-const table         = document.getElementById("libraryContentTable");
-const tableRows     = document.getElementById("data-rows");
-
-function Book(id, title, author, numberOfPages, readed){
-    if (!new.target){
-        throw Error("Debe ser llamado con 'new'");
+class Library{
+    #booksStorage;
+    constructor(){
+        this.#booksStorage = [];
     }
-    this.id            = id;
-    this.title         = title;
-    this.author        = author;
-    this.numberOfPages = numberOfPages;
-    this.readed        = readed;
-}
 
-function addBookToLibrary(title, author, numberOfPages, readed){
-    const id   = crypto.randomUUID();
-    const book = new Book(id, title, author, numberOfPages, readed);
-    myLibrary.push(book);
-}
-
-function cleanTable(){
-    Array.from(tableRows.childNodes).forEach(child => tableRows.removeChild(child));
-}
-
-function createTableRowWithBookData(book){
-    const newRow = document.createElement("tr");
-    for (field in book){
-        let tableData = document.createElement("td");
-        tableData.textContent = book[field];
-        newRow.appendChild(tableData);
+    addBookToLibrary(aBook){
+        const bookID = crypto.randomUUID();
+        this.#booksStorage.push({id: bookID, book: aBook});
     }
-    return newRow;
+
+    removeBook(aBook){
+        this.#booksStorage = this.#booksStorage.filter((aLibraryBook => !aBook.equals(aLibraryBook.book)));
+    }
+
+    forEachBook(aFunction){
+        this.#booksStorage.forEach(aBookRegister => aFunction(aBookRegister.book));    
+    }
+
+    getIdOf(aBook){
+        return this.#booksStorage.find(aLibraryBook => aLibraryBook.book.equals(aBook))?.id;
+    }
+}
+class Book{
+    #title;
+    #author;
+    #numberOfPages;
+    #read;
+
+    constructor(title, author, numberOfPages, read){
+        this.#title         = title;
+        this.#author        = author;
+        this.#numberOfPages = numberOfPages;
+        this.#read        = read;
+    }
+
+    getTitle(){
+        return String(this.#title);
+    }
+
+    getAuthor(){
+        return String(this.#author);
+    }
+
+    getNumberOfPages(){
+        return String(this.#numberOfPages);
+    }
+
+    changeReadStatus(){
+        this.#read = !this.#read;
+    }
+
+    equals(anotherBook){
+        return anotherBook instanceof Book && this.#title === anotherBook.getTitle() && this.#author === anotherBook.getAuthor() && this.#numberOfPages === anotherBook.getNumberOfPages();
+    }  
+
+    getData(){
+        return [this.getTitle(), this.getAuthor(), this.getNumberOfPages(), this.#read];
+    }
+}
+class Table{
+    #library;
+    #columns;
+    #tableBody;
+    constructor(aLibrary, columns){
+        this.#library = aLibrary;
+        this.#columns = columns;
+        const tableElement = document.createElement("table");
+        tableElement.id = "libraryContentTable";
+        const thead = document.createElement("thead");
+        const tr = document.createElement("tr");
+        thead.appendChild(tr);
+        for (let column of columns){
+            const th = document.createElement("th");
+            th.textContent = column;
+            tr.appendChild(th);
+        }
+        tableElement.appendChild(thead);
+        this.#tableBody = document.createElement("tbody");
+        this.#tableBody.id = "data-rows";
+        tableElement.appendChild(this.#tableBody);
+        document.body.appendChild(tableElement);
+    }
+
+    cleanTable(){
+        Array.from(this.#tableBody.childNodes).forEach(child => this.#tableBody.removeChild(child));
+    }
+
+    displayLibraryContent(){
+        this.cleanTable();
+        this.#library.forEachBook(book => {
+            const id = this.#library.getIdOf(book);
+            const newRow = this.createTableRowWithBookData(book, id);
+            this.createButtonsForBookRow(book, newRow);
+            this.#tableBody.appendChild(newRow);
+        })
+    }
+
+    createButtonsForBookRow(book, row){
+        const removeBookButton       = document.createElement("button");
+        const changeReadStatusButton = document.createElement("button");
+
+        removeBookButton.addEventListener("click", (event) => {
+            this.#library.removeBook(book);
+            this.displayLibraryContent();
+        });
+        changeReadStatusButton.addEventListener("click", (event) => {
+            book.changeReadStatus(book);
+            this.displayLibraryContent();
+        });
+        const tdRemoveBook = document.createElement("td");
+        tdRemoveBook.appendChild(removeBookButton);
+        const tdChangeStatus = document.createElement("td");
+        tdChangeStatus.appendChild(changeReadStatusButton);
+        row.appendChild(tdRemoveBook);
+        row.appendChild(tdChangeStatus);
+    }
+
+    createTableRowWithBookData(aBook, id){
+        const newRow = document.createElement("tr");
+        const idCol = document.createElement("td");
+        idCol.textContent = id;
+        newRow.appendChild(idCol);
+        const data   = aBook.getData().forEach(bookDataField => {
+            let tableData = document.createElement("td");
+            tableData.textContent = bookDataField;
+            newRow.appendChild(tableData);
+        });
+        return newRow;
+    }
 }
 
-function createButtonsForBookRow(book, row){
-    const removeBookButton       = document.createElement("button");
-    const changeReadStatusButton = document.createElement("button");
-    
-    removeBookButton.addEventListener("click", (event) => removeBook(book));
-    changeReadStatusButton.addEventListener("click", (event) => changeReadStatus(book));
-    
-    row.appendChild(document.createElement("td").appendChild(removeBookButton));
-    row.appendChild(document.createElement("td").appendChild(changeReadStatusButton));
-}
-
-
-function displayLibraryContent(){
-    cleanTable();
-    myLibrary.forEach(book => {
-        const newRow = createTableRowWithBookData(book);
-        createButtonsForBookRow(book, newRow);
-        tableRows.appendChild(newRow);
-    })
-}
-
-function changeReadStatus(book){
-    book.readed = (book.readed === "read") ? "not read" : "read";
-    displayLibraryContent();    
-}
-
-function removeBook(book){
-    myLibrary =  myLibrary.filter(libraryBook => libraryBook.id !== book.id);
-    displayLibraryContent();
-}
 
 function closeDialogForm(){
     document.getElementById("addBookForm").reset();
     dialog.close();
 }
+const library       = new Library();
+const table         = new Table(library, ["ID", "Title", "Author", "Number of pages", "¿read?"]);
 
 sendButton.addEventListener("click", (event) => {
     event.preventDefault();
     const bookTitle     = document.getElementById("bookTitleInput").value;
     const bookAuthor    = document.getElementById("bookAuthorInput").value;
     const numberOfPages = document.getElementById("pagesNumberInput").value;
-    const readed        = (document.getElementById("readCheckbox").checked) ? "read" : "not read";
-    addBookToLibrary(bookTitle, bookAuthor, numberOfPages, readed);
+    const read        = (document.getElementById("readCheckbox").checked);
+    library.addBookToLibrary(new Book(bookTitle, bookAuthor, numberOfPages, read));
     closeDialogForm();
-    displayLibraryContent();
+    table.displayLibraryContent();
 });
 cancelButton.addEventListener("click", event => closeDialogForm());
 addBookButton.addEventListener("click", event => addBookDialog.showModal());
