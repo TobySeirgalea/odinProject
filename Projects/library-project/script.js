@@ -10,22 +10,19 @@ class Library{
 
     addBookToLibrary(aBook){
         const bookID = crypto.randomUUID();
-        this.#booksStorage.push({id: bookID, book: aBook});
+        this.#booksStorage.push(aBook);
     }
 
     removeBook(aBook){
-        this.#booksStorage = this.#booksStorage.filter((aLibraryBook => !aBook.equals(aLibraryBook.book)));
+        this.#booksStorage = this.#booksStorage.filter((aLibraryBook => !aBook.equals(aLibraryBook)));
     }
 
     forEachBook(aFunction){
-        this.#booksStorage.forEach(aBookRegister => aFunction(aBookRegister.book));    
-    }
-
-    getIdOf(aBook){
-        return this.#booksStorage.find(aLibraryBook => aLibraryBook.book.equals(aBook))?.id;
+        this.#booksStorage.forEach(aBookRegister => aFunction(aBookRegister));    
     }
 }
 class Book{
+    #id;
     #title;
     #author;
     #numberOfPages;
@@ -35,7 +32,8 @@ class Book{
         this.#title         = title;
         this.#author        = author;
         this.#numberOfPages = numberOfPages;
-        this.#read        = read;
+        this.#read          = read;
+        this.#id            = crypto.randomUUID();
     }
 
     getTitle(){
@@ -50,6 +48,10 @@ class Book{
         return String(this.#numberOfPages);
     }
 
+    getId(){
+        return String(this.#id);
+    }
+
     changeReadStatus(){
         this.#read = !this.#read;
     }
@@ -58,23 +60,35 @@ class Book{
         return anotherBook instanceof Book && this.#title === anotherBook.getTitle() && this.#author === anotherBook.getAuthor() && this.#numberOfPages === anotherBook.getNumberOfPages();
     }  
 
+    wasRead(){
+        return String(this.#read);
+    }
+
     getData(){
-        return [this.getTitle(), this.getAuthor(), this.getNumberOfPages(), this.#read];
+        return [this.getId(), this.getTitle(), this.getAuthor(), this.getNumberOfPages(), this.wasRead()];
+    }
+
+    accept(aVisitor){
+        aVisitor.visitBook(this);
     }
 }
-class Table{
+class LibraryVisitor{
     #library;
     #columns;
     #tableBody;
     constructor(aLibrary, columns){
         this.#library = aLibrary;
         this.#columns = columns;
+        this.#createTable(columns);
+    }
+
+    #createTable(columns) {
         const tableElement = document.createElement("table");
         tableElement.id = "libraryContentTable";
         const thead = document.createElement("thead");
         const tr = document.createElement("tr");
         thead.appendChild(tr);
-        for (let column of columns){
+        for (let column of columns) {
             const th = document.createElement("th");
             th.textContent = column;
             tr.appendChild(th);
@@ -86,61 +100,68 @@ class Table{
         document.body.appendChild(tableElement);
     }
 
-    cleanTable(){
+    #cleanTable(){
         Array.from(this.#tableBody.childNodes).forEach(child => this.#tableBody.removeChild(child));
     }
 
     displayLibraryContent(){
-        this.cleanTable();
-        this.#library.forEachBook(book => {
-            const id = this.#library.getIdOf(book);
-            const newRow = this.createTableRowWithBookData(book, id);
-            this.createButtonsForBookRow(book, newRow);
-            this.#tableBody.appendChild(newRow);
-        })
+        this.#cleanTable();
+        this.#fillTable();
     }
 
-    createButtonsForBookRow(book, row){
-        const removeBookButton       = document.createElement("button");
-        const changeReadStatusButton = document.createElement("button");
+    #fillTable(){
+        this.#library.forEachBook(aBook =>  aBook.accept(this));
+    }
 
+    #createRemoveButton(book){
+        const removeBookButton = document.createElement("button");
+        const tdRemoveBook     = document.createElement("td");
         removeBookButton.addEventListener("click", (event) => {
             this.#library.removeBook(book);
             this.displayLibraryContent();
         });
+        tdRemoveBook.appendChild(removeBookButton);
+        return tdRemoveBook;    
+    }
+    
+    #createChangeToReadButton(book){
+        const changeReadStatusButton = document.createElement("button");
+        const tdChangeStatus         = document.createElement("td");
         changeReadStatusButton.addEventListener("click", (event) => {
             book.changeReadStatus(book);
             this.displayLibraryContent();
         });
-        const tdRemoveBook = document.createElement("td");
-        tdRemoveBook.appendChild(removeBookButton);
-        const tdChangeStatus = document.createElement("td");
         tdChangeStatus.appendChild(changeReadStatusButton);
-        row.appendChild(tdRemoveBook);
-        row.appendChild(tdChangeStatus);
+        return tdChangeStatus;
+    }
+    
+    #createButtonsForBookRow(book, row){
+        row.appendChild(this.#createRemoveButton(book));
+        row.appendChild(this.#createChangeToReadButton(book));
     }
 
-    createTableRowWithBookData(aBook, id){
-        const newRow = document.createElement("tr");
-        const idCol = document.createElement("td");
-        idCol.textContent = id;
-        newRow.appendChild(idCol);
-        const data   = aBook.getData().forEach(bookDataField => {
-            let tableData = document.createElement("td");
-            tableData.textContent = bookDataField;
-            newRow.appendChild(tableData);
+    #addBookDataToRow(aBook, aRow){
+        aBook.getData().forEach(bookDatField => {
+            const tableData = document.createElement("td");
+            tableData.textContent = bookDatField;
+            aRow.appendChild(tableData);
         });
-        return newRow;
+    }
+
+    visitBook(aBook){
+        const newRow = document.createElement("tr");
+        this.#addBookDataToRow(aBook, newRow);
+        this.#createButtonsForBookRow(aBook, newRow);
+        this.#tableBody.appendChild(newRow);        
     }
 }
-
 
 function closeDialogForm(){
     document.getElementById("addBookForm").reset();
     dialog.close();
 }
 const library       = new Library();
-const table         = new Table(library, ["ID", "Title", "Author", "Number of pages", "¿read?"]);
+const table         = new LibraryVisitor(library, ["ID", "Title", "Author", "Number of pages", "¿read?"]);
 
 sendButton.addEventListener("click", (event) => {
     event.preventDefault();
@@ -154,3 +175,4 @@ sendButton.addEventListener("click", (event) => {
 });
 cancelButton.addEventListener("click", event => closeDialogForm());
 addBookButton.addEventListener("click", event => addBookDialog.showModal());
+
