@@ -21,6 +21,8 @@ class Library{
         this.#booksStorage.forEach(aBookRegister => aFunction(aBookRegister));    
     }
 }
+
+//De momento parece una clase anémica, sin funcionalidad propia y que puede ser reemplazada por una estructura de datos
 class Book{
     #id;
     #title;
