@@ -1,0 +1,56 @@
+.rowDenseGrid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 2fr));
+    grid-auto-flow: row dense;
+    padding: 15px 30px;
+    background-image: var(--radialBackgroundImage);
+    justify-content: center;
+}
+
+.categoryContainer img{
+    width: 100%;
+    border-radius: 10px 10px 0px 0px;
+    border: 5px solid;
+    border-style: none none double none;
+    border-image: var(--italianFlagBorder);
+    object-fit: cover;
+}
+
+.categoryContainer img:hover{
+    margin-bottom: 10px;
+    transform: scale(1.1);
+    transition: 1s;    
+}
+
+.categoryTitle{
+    text-align: center;
+    color: red;
+    text-decoration: 2px underline wavy;
+}
+
+.categoryContainer{
+    margin: 10px;
+    overflow: hidden;
+    border-radius: 10px;
+    border: 2px double black;
+    background-color: white;
+    box-shadow: -5px 5px 10px 1px #635c5cde;
+}
+
+.categoryContainer:hover{
+    transform: scale(1.1);
+    transition: 1s;
+}
+
+.categoryOptionsList{
+    list-style: none;
+    padding: 0;
+    font-family: "Tangerine";
+    font-weight: bold;
+}
+
+.optionContainer{
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 7px;
+}

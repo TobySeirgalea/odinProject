@@ -1,0 +1,89 @@
+#mainContentContainer{
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    grid-template-rows: 1fr;
+    background-color: black;
+    color: white;
+    text-align: center;
+    font-family: "Tangerine";
+    border: 10px double;
+    border-image: var(--italianFlagBorder);
+    overflow: hidden;
+}
+
+
+#mainContentContainer #titlesContainer{
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+}
+
+#mainContentContainer img{
+    margin: 20px 0px;
+    grid-column: 2;
+    border-radius: 300px 0px 0px 300px;
+    min-height: 295px;
+    min-width: 340px;
+}
+
+#caracteristicasContainer{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 0% clamp(5px, 10%, 80%);
+    margin-top: 50px;
+}
+
+#titlesContainer h1{
+    font-size: 6rem;
+}
+
+#titlesContainer h2{
+    font-size: 2rem;
+}
+
+#titlesContainer h1, #titlesContainer h2{
+    margin: 0;
+    padding: 0;
+}
+
+#placeDescriptionContainer #nombreRestaurante{
+    font-size: 2rem;
+    color: red;
+    font-family: "Tangerine";
+    font-weight: bold;
+    margin: 20px 0px 0px 0px;
+    text-decoration: underline double 1.2px;
+}
+
+#placeDescriptionContainer{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-style: italic;
+    background-image: var(--radialBackgroundImage);
+    padding-bottom: 50px;
+}
+
+.caracteristica h4{
+    margin: 15px;
+}
+
+.caracteristica{
+    width: 20%;
+    min-width: 88px;
+    text-align: center;
+}
+
+
+
+.caracteristica img{
+    width: 100%;
+}
+
+
+.caracteristica:hover img{
+    transform: scale(1.15);
+    transition: 0.5s;
+    margin: 20px 0px;
+}
