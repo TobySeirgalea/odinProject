@@ -1,0 +1,150 @@
+.horizontalCarouselContainer{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+ul[class="horizontalCarouselList"][class="horizontalCarouselList"]{
+  width: 70%;
+  height: 500px;
+  padding: 10px;
+
+  overflow-x: scroll;  /*Queremos que en caso de overflow poder scrollear en x*/
+  
+  scroll-snap-type: x mandatory;/*Así el scroll en x se mueve con cada click y se centra en un nuevo item*/
+
+  scrollbar-width: none; /*Así no aparece la scroll bar*/
+  
+  columns: 1; /*Usamos mul[class="horizontalCarouselList"]ti-column layout: Se divide el espacio del container en la cantidad que indique column-count, en este caso al ser una cantidad y no una medida estamos asignando el valor de column-count a 1El browser se encargará de su longitud*/
+  text-align: center;
+  justify-self: center;
+  align-self: center;
+}
+li[class="horizontalCarouselItem"] {
+  list-style-type: none;
+
+  display: inline-block; 
+  height: 100%;
+  width: 50%;
+
+  background-color: #eeeeee;
+  border: 1px solid #dddddd;
+  border-radius: 4px;
+  padding: 20px;
+  margin: 0 10px;
+
+  text-align: left;
+}
+
+ul[class="horizontalCarouselList"]::column {
+  scroll-snap-align: center; /*Así en cada columna el scroll se alinea horizontalmente al centro de ella*/
+}
+
+/*::scroll-button(<scroll-button-direction>) si ponemos * hacemos referencia a todas las direcciones*/
+ul[class="horizontalCarouselList"]::scroll-button(*) {
+  border: 0;
+  font-size: 2rem;
+  background: none;
+  color: black;
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+/*Lo hacemos más visible tanto en hover como en focus por si se accede a él por tab y no por mouse*/
+ul[class="horizontalCarouselList"]::scroll-button(*):hover,
+ul[class="horizontalCarouselList"]::scroll-button(*):focus {
+  opacity: 1;
+}
+
+/*Este se activa cuando clickeas el botón, así damos la sensación de que se hunde un poco*/
+ul[class="horizontalCarouselList"]::scroll-button(*):active {
+    translate: 1px 1px;
+}
+
+/*Cuando no se puede mover más en una dirección, ese scroll-button(direccion) pasa a disabled*/
+ul[class="horizontalCarouselList"]::scroll-button(*):disabled {
+  opacity: 0.2;
+  cursor: unset;
+  /*Queremos dar impresión de que no está disponible*/
+}
+
+ul[class="horizontalCarouselList"]::scroll-button(left) {
+  content: "◄" / "Previous";
+}
+
+ul[class="horizontalCarouselList"]::scroll-button(right) {
+  content: "►" / "Next";
+}
+
+/*Usamos anchoring */
+ul[class="horizontalCarouselList"][class="horizontalCarouselList"]{
+  anchor-name: --my-carousel;
+}
+
+/*Lo anclamos a --my-carousel, y usamos position absoluto*/
+ul[class="horizontalCarouselList"]::scroll-button(*) {
+  position: absolute;
+  position-anchor: --my-carousel;
+}
+
+/*Lo posicionamos absolutamente pero respecto a la posición de su elemento anchor, que es --my-carousel*/
+ul[class="horizontalCarouselList"]::scroll-button(left) {
+  right: calc(anchor(left) - 50px);
+  bottom: calc(anchor(top) - 200px);
+}
+
+ul[class="horizontalCarouselList"]::scroll-button(right) {
+  left: calc(anchor(right) - 50px);
+  bottom: calc(anchor(top) - 200px);
+}
+
+ul[class="horizontalCarouselList"][class="horizontalCarouselList"]{
+  scroll-marker-group: after;
+}
+
+/*Definimos los puntos que harán de scroll bar*/
+ul[class="horizontalCarouselList"]::scroll-marker-group {
+  position: absolute;
+  position-anchor: --my-carousel;
+  top: calc(anchor(bottom));
+  justify-self: anchor-center;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+ul[class="horizontalCarouselList"]::column::scroll-marker {
+  content: "";
+  width: 16px;
+  height: 16px;
+  background-color: transparent;
+  border: 2px solid black;
+  border-radius: 10px;
+}
+/*Estilo para los previos al actual*/
+ul[class="horizontalCarouselList"]::column::scroll-marker:target-before {
+  border: 2px solid gray;
+}
+/*Estilo para el seleccionado*/
+ul[class="horizontalCarouselList"]::column::scroll-marker:target-current {
+  background-color: black;
+  transition: all 0.7s;
+}
+/*Estilos para los posteriores al seleccionado*/
+ul[class="horizontalCarouselList"]::column::scroll-marker:target-after {
+  border: 2px solid grey;
+}
+
+li[class="horizontalCarouselItem"] img{
+    align-self: center;
+    justify-self: center;
+    border-radius: 4px;
+}
+
+.horizontalCarouselContainer li[class="horizontalCarouselItem"]{
+    text-align: center;
+    font-family: "Tangerine";
+    font-size: 1.5rem;
+    font-weight: bold;
+    border-radius: 5px;
+}
+

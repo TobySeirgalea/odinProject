@@ -1,11 +1,11 @@
-import imagenLuigis  from "./imagenPpal.webp";
-import imagenVinos   from "./vinos.png";
-import imagenHuerta  from "./huerta.png";
-import imagenRecetas from "./recipes.png";
-import imagenItalia  from "./ambiente.png";
-import "./starting.css";
-import "./mainStyles.css";
-import "./style-normalize.css";
+import imagenLuigis  from "../images/imagenPpal.webp";
+import imagenVinos   from "../logos/vinos.png";
+import imagenHuerta  from "../logos/huerta.png";
+import imagenRecetas from "../logos/recipes.png";
+import imagenItalia  from "../logos/ambiente.png";
+import "../styles/starting.css";
+import "../styles/mainStyles.css";
+import "../styles/style-normalize.css";
 import {createElement, appendChildsToElement, createImage} from "./domManipulationHelpers.js";
 
 function firstPageContent(){

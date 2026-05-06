@@ -9,7 +9,7 @@ const __dirname = path.dirname(__filename);
 
 export default {
   mode: "development",
-  entry: "./src/index.js",
+  entry: "./src/scripts/index.js",
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: "bundle.js",
@@ -33,6 +33,7 @@ export default {
   plugins: [
     new HtmlWebpackPlugin({
         template: "./src/index.html",
+        favicon: "./src/logos/luigisLogo.png",
         }),
     ],
 };

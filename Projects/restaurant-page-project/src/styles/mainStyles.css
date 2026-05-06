@@ -3,6 +3,10 @@ body{
     --italianFlagBorder    : linear-gradient(to right, #008C45 33%, #F4F9FF 33% 66%, #CD212A 66%) 1;
 }
 
+body header{
+    min-width: 250px;
+    
+}
 
 body header nav{
     display: flex;
@@ -22,10 +26,11 @@ body header button{
     cursor: pointer;
     margin: 2px;
     justify-self: center;
-    min-width: fit-content;
+    min-width: 250px;
     max-width: 30%;
+    box-sizing: border-box;
 }
-button:hover{
+body header button:hover{
     transform: scale(1.2);
     transition: 1s;
 }
@@ -37,8 +42,8 @@ body{
 
 @font-face {
     font-family: 'Tangerine';
-    src: url('./fonts/Tangerine-Bold.woff2') format('woff2'),
-        url('./fonts/Tangerine-Bold.woff') format('woff');
+    src: url('../fonts/Tangerine-Bold.woff2') format('woff2'),
+        url('../fonts/Tangerine-Bold.woff') format('woff');
     font-weight: bold;
     font-style: normal;
     font-display: swap;
@@ -46,8 +51,8 @@ body{
 
 @font-face {
     font-family: 'Tangerine';
-    src: url('./fonts/Tangerine-Regular.woff2') format('woff2'),
-        url('./fonts/Tangerine-Regular.woff') format('woff');
+    src: url('../fonts/Tangerine-Regular.woff2') format('woff2'),
+        url('../fonts/Tangerine-Regular.woff') format('woff');
     font-weight: normal;
     font-style: normal;
     font-display: swap;

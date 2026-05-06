@@ -17,10 +17,22 @@ function createElement(tagAsString, elementsTextContent, elementID, classes){
     return element;
 }
 
-function createImage(image, altText){
+function createImagesContainer(images, className){
+    const container = createElement("div", "", "", className);
+    appendChildsToElement(container, images);
+    return container;
+}
+
+
+function createImage(image, altText, attributionLink){
     const newImage = new Image();
     newImage.alt = altText;
     newImage.src = image;
+    if (attributionLink){
+        const attribution = document.createElement("a", "", "", "");
+        attribution.href = attributionLink;
+        newImage.appendChild(attribution);
+    }
     return newImage;
 }
 
@@ -28,4 +40,4 @@ function removeContentOfElement(element){
     element.innerHTML = "";
 }
 
-export{createElement, createImage, appendChildsToElement, removeContentOfElement};
+export{createElement, createImage, appendChildsToElement, removeContentOfElement, createImagesContainer};

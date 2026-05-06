@@ -1,10 +1,12 @@
 .rowDenseGrid{
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 2fr));
-    grid-auto-flow: row dense;
+    grid-auto-flow: dense;
     padding: 15px 30px;
     background-image: var(--radialBackgroundImage);
     justify-content: center;
+    min-width: 200px;
+    width: 100%;
 }
 
 .categoryContainer img{
@@ -18,8 +20,8 @@
 
 .categoryContainer img:hover{
     margin-bottom: 10px;
-    transform: scale(1.1);
-    transition: 1s;    
+    transform: scale(1.01);
+    transition: 0.9s;    
 }
 
 .categoryTitle{
@@ -30,15 +32,15 @@
 
 .categoryContainer{
     margin: 10px;
-    overflow: hidden;
     border-radius: 10px;
     border: 2px double black;
     background-color: white;
     box-shadow: -5px 5px 10px 1px #635c5cde;
+    height: min-content;
 }
 
 .categoryContainer:hover{
-    transform: scale(1.1);
+    transform: scale(1.01);
     transition: 1s;
 }
 
@@ -47,10 +49,59 @@
     padding: 0;
     font-family: "Tangerine";
     font-weight: bold;
+    font-size: 1.4rem;
 }
 
 .optionContainer{
     display: flex;
     justify-content: space-between;
     padding: 2px 7px;
+    border-bottom: 1px dashed black;
+    
+}
+
+.contentContainer{
+    display: flex;
+    justify-content: space-between;
+    margin: 0;
+    padding: 0;
+}
+
+.sideBar{
+    flex: 3 1 30%;
+    background-color: black;
+}
+
+.sideBar nav{
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+
+}
+
+.categoryNavButton{
+    margin: clamp(5px, 10px, 50px) 5px;
+    border-radius: 20px;
+    background-image: var(--radialBackgroundImage);
+    border: 0;
+}
+
+.categoryNavButton:hover{
+    cursor: pointer;
+    background-image: none;
+    background-color: rgb(165, 165, 165);
+}
+
+
+.sideBarLogoContentContainer{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 4px;
+}
+
+.sideBarLogoContentContainer img{
+    width: 16px;
 }
