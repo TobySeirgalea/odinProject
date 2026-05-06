@@ -63,3 +63,27 @@ Podés usar las configuraciones específicas que provee cada *plugin* al crear u
 ## Mode
 
 Permite definir pre-configuraciones, por ejemplo para modos `development` o `production`.
+
+## Tree shaking
+
+La idea de esta optimización es eliminar *dead code*. El código que se puede eliminar debe cumplir dos condiciones:
+
+1. No ser invocado ni directamente ni indirectamente.
+2. No tener efectos secundarios.
+
+Caso contrario no se puede.
+
+Esta información se encuentra en el *JSON package*, incluyendo `side-effects: false o side-effects: [arreglo de regex de archivos con side-effects, como los css]`.
+
+De este modo permite traerse al *bundle* solamente el código utilizado realmente en el programa.
+
+Si un archivo tiene efectos secundarios o sus exports son utilizados debemos incluirlo, también esto aplica en un nivel micro, permitiéndonos traer solo un fragmento de código de un archivo.
+
+Se puede indicar que una función es libre de efectos secundarios utilizando los comentarios para poner una etiqueta:
+
+```js
+/* #__PURE__ */ double(55);
+```
+
+Solo si estamos en modo `production` ese código eliminado no estaŕa en el *bundle*, ya que este agrega `ModuleConcatenationPlugin` necesario para *tree shaking*.
+
