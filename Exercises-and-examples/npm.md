@@ -39,7 +39,7 @@ Luego cuando hagamos `npm init` vamos a tener esos valores que hayamos seteado.
 
 Si al instalar un paquete usamos `npm install nombrePaquete --save` nuestro `package.json` se actualiza automáticamente con ese paquete.
 
-Podemos añadir el tipo de dependencia, e.g.: `npm install nombrePaquete --save--dev`.
+Podemos añadir el tipo de dependencia, e.g.: `npm install nombrePaquete --save-dev`.
 
 ## Agregando scripts al package JSON
 

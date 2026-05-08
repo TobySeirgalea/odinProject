@@ -1,0 +1,15 @@
+{
+    "defaultTaskTitle" : "Sin título",
+    "defaultDescriptionText": "",
+    "formatISOOptions": {"representation" : "complete", "format" : "extended"},
+    "errorMessages" : {"cantCreateTaskForThePastErrorMessage" : "No se puede crear una tarea con fecha límite en el pasado",
+                       "cantCreateTaskWithInvalidPriorityValueErrorMessage" : "No se puede crear una tarea con una prioridad fuera del rango válido",
+                       "cantChangePriorityToInvalidValueErrorMessage" : "No se puede cambiar la prioridad a un valor inválido",
+                       "cantChangeDueDateToThePast" : "No se puede cambiar la fecha límite a una en el pasado",
+                       "cantCreateAnEmptyNote": "No se puede crear una nota vacía",
+                       "cantCreateCompositeTasksWithoutInstanceCreationMethods" : "No se puede crear una instancia de CompositeTasks si no es utilizando los métodos de creación de instancia",
+                       "cantCreateAnInstanceOfTaskWithoutInstanceCreationMethods" : "No se puede crear una instancia de Task si no es utilizando los métodos de creación de instancia",
+                       "cantCreateAnInstanceOfConcreteTaskWithoutInstanceCreationMethods" : "No se puede crear una instancia de Task si no es utilizando los métodos de creación de instancia"
+                    },
+    "taskPriorities" : {"maxPriorityValue" : 5, "minPriorityValue" : 0, "step": 1, "defaultConcreteTaskPriorityValue": 0, "defaultCompositeTaskPriorityValue" : 0}
+}
