@@ -1,7 +1,6 @@
 import defaultValues from "../appConstantValues.json" with {type: 'json'};
 import {endOfToday, formatISO, isPast, toDate, min} from "date-fns";
 
-
 class Task{
     #title;
     #description;
@@ -9,6 +8,26 @@ class Task{
     #completed;
     #priorityValue;
     static #accessedViaInstanceCreationMethod = false;
+
+    static isAValidDueDate(aDueDate){
+        return !isPast(aDueDate);
+    }
+
+    static isAValidPriorityValue(aPriorityValue){
+        return aPriorityValue >= defaultValues.taskPriorities.minPriorityValue && aPriorityValue <= defaultValues.taskPriorities.maxPriorityValue;
+    }
+    
+    static assertIsAValidDueDate(aDueDate, errorMessage) {
+        if (!this.isAValidDueDate(aDueDate)) {
+            throw new Error(errorMessage);
+        }
+    }
+
+    static assertIsAValidPriorityValue(aPriorityValue, errorMessage) {
+        if (!this.isAValidPriorityValue(aPriorityValue)) {
+            throw new Error(errorMessage);
+        }
+    }
 
     static createConcreteTask(aDueDate, aPriorityValue, aTitle, aDescription){
         Task.#accessedViaInstanceCreationMethod = true;    
@@ -18,6 +37,10 @@ class Task{
     static createCompositeTask(dependentTasks, aDueDate, aPriorityValue, aTitle, aDescription){
         Task.#accessedViaInstanceCreationMethod = true;    
         return CompositeTask.createWith(dependentTasks, aDueDate, aPriorityValue, aTitle, aDescription);
+    }
+
+    static createWith(){
+        throw new Error("Subclass should implement this!");
     }
 
     constructor(aDueDate, aPriorityValue, aTitle, aDescription){
@@ -33,14 +56,6 @@ class Task{
             this.#dueDate = formattedDueDate;
         }
         this.#priorityValue = aPriorityValue;
-    }
-
-    static createWith(){
-        throw new Error("Subclass should implement this!");
-    }
-
-    assertIsAValidDueDate(aDueDate, errorMessage) {
-        throw new Error("Subclass should implement this!");
     }
 
     changeDueDate(aNewDueDate){
@@ -61,10 +76,6 @@ class Task{
 
     isCompleted(){
         return this.#completed === true;
-    }
-
-    isAValidPriorityValue(aPriorityValue){
-        throw new Error("Subclass should implement this!");
     }
 
     priorityEquals(aPriorityValue){
@@ -106,10 +117,15 @@ class Task{
     }
 }
 
-
 class ConcreteTask extends Task{
     static #accessedViaInstanceCreationMethod = false;
-//aDueDate, aPriorityValue, aTitle, aDescription
+
+    static createWith(aDueDate, aPriorityValue, aTitle, aDescription){
+        ConcreteTask.#accessedViaInstanceCreationMethod = true;
+        return new ConcreteTask(aDueDate, aPriorityValue, aTitle, aDescription); 
+    }
+
+
     constructor(aDueDate = toDate(endOfToday), aPriorityValue = defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, aTitle = defaultValues.defaultTaskTitle, aDescription = defaultValues.defaultDescriptionText){        
         if (!ConcreteTask.#accessedViaInstanceCreationMethod){
             throw new Error(defaultValues.errorMessages.cantCreateAnInstanceOfConcreteTaskWithoutInstanceCreationMethods);
@@ -119,48 +135,16 @@ class ConcreteTask extends Task{
         ConcreteTask.assertIsAValidPriorityValue(aPriorityValue, defaultValues.errorMessages.cantCreateTaskWithInvalidPriorityValueErrorMessage);         
         super(aDueDate, aPriorityValue, aTitle, aDescription);        
     }
-
-    static createWith(aDueDate, aPriorityValue, aTitle, aDescription){
-        ConcreteTask.#accessedViaInstanceCreationMethod = true;
-        return new ConcreteTask(aDueDate, aPriorityValue, aTitle, aDescription); 
-    }
-
-    static assertIsAValidDueDate(aDueDate, errorMessage) {
-        if (isPast(aDueDate)) {
-            throw new Error(errorMessage);
-        }
-    }
-
-    static assertIsAValidPriorityValue(aPriorityValue, errorMessage) {
-        if (!ConcreteTask.isAValidPriorityValue(aPriorityValue)) {
-            throw new Error(errorMessage);
-        }
-    }
-
-    static isAValidPriorityValue(aPriorityValue){
-        return aPriorityValue >= defaultValues.taskPriorities.minPriorityValue && aPriorityValue <= defaultValues.taskPriorities.maxPriorityValue;
-    }
 }
 
 class CompositeTask extends Task{
     #tasks = [];
 
     static #accessedViaInstanceCreationMethod = false;
-//dependentTasks, aDueDate, aPriorityValue, aTitle, aDescription
+
     static createWith(aDependentTasksList = [], aDueDate = CompositeTask.earliestDueDateTask(aDependentTasksList).getDueDate(), aPriorityValue = defaultValues.taskPriorities.defaultCompositeTaskPriorityValue, aTitle=defaultValues.defaultTaskTitle, aDescription=defaultValues.defaultDescriptionText){
         CompositeTask.#accessedViaInstanceCreationMethod = true;
         return new CompositeTask(aDependentTasksList, aDueDate, aPriorityValue, aTitle, aDescription);
-    }
-    
-    constructor(aDependentTasksList, aDueDate, aPriorityValue, aTitle, aDescription){
-        if (!CompositeTask.#accessedViaInstanceCreationMethod){
-            throw new Error(defaultValues.errorMessages.cantCreateCompositeTasksWithoutInstanceCreationMethods);
-        }
-        CompositeTask.#accessedViaInstanceCreationMethod = false;
-        CompositeTask.assertIsAValidDueDate(aDueDate, defaultValues.errorMessages.cantCreateTaskForThePastErrorMessage);
-        CompositeTask.assertIsAValidPriorityValue(aPriorityValue, defaultValues.errorMessages.cantCreateTaskWithInvalidPriorityValueErrorMessage);
-        super(aDueDate, aPriorityValue, aTitle, aDescription);
-        aDependentTasksList.forEach(task => this.#tasks.push(task));
     }
 
     static earliestDueDateTask(aDependentTasksList){
@@ -170,11 +154,15 @@ class CompositeTask extends Task{
         return aDependentTasksList.reduce((earliest, currentTask) => earliest = earliest.dueDateIsEarlierThan(currentTask) ? earliest : currentTask);
     }
 
-    static assertIsAValidDueDate(aDueDate, errorMessage){
-
-    }
-    static assertIsAValidPriorityValue(aPriorityValue, errorMessage){
-
+    constructor(aDependentTasksList, aDueDate, aPriorityValue, aTitle, aDescription){
+        if (!CompositeTask.#accessedViaInstanceCreationMethod){
+            throw new Error(defaultValues.errorMessages.cantCreateCompositeTasksWithoutInstanceCreationMethods);
+        }
+        CompositeTask.#accessedViaInstanceCreationMethod = false;
+        CompositeTask.assertIsAValidDueDate(aDueDate, defaultValues.errorMessages.cantCreateTaskForThePastErrorMessage);
+        CompositeTask.assertIsAValidPriorityValue(aPriorityValue, defaultValues.errorMessages.cantCreateTaskWithInvalidPriorityValueErrorMessage);
+        super(aDueDate, aPriorityValue, aTitle, aDescription);
+        aDependentTasksList.forEach(task => this.#tasks.push(task));
     }
 
     includesTask(aTask){
