@@ -1,0 +1,1 @@
+//En un futuro usar esto para eliminar if en isCompleted

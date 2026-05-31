@@ -9,7 +9,9 @@
                        "cantCreateAnEmptyNote": "No se puede crear una nota vacía",
                        "cantCreateCompositeTasksWithoutInstanceCreationMethods" : "No se puede crear una instancia de CompositeTasks si no es utilizando los métodos de creación de instancia",
                        "cantCreateAnInstanceOfTaskWithoutInstanceCreationMethods" : "No se puede crear una instancia de Task si no es utilizando los métodos de creación de instancia",
-                       "cantCreateAnInstanceOfConcreteTaskWithoutInstanceCreationMethods" : "No se puede crear una instancia de Task si no es utilizando los métodos de creación de instancia"
+                       "cantCreateAnInstanceOfConcreteTaskWithoutInstanceCreationMethods" : "No se puede crear una instancia de Task si no es utilizando los métodos de creación de instancia",
+                       "cantCompleteCompositeTaskUntilAllComponentTasksAreCompleted" : "No se puede completar una CompositeTasks si no fueron completadas todas las internas",
+                       "taskNotPresentInCompositeTask" : "La CompositeTask no incluye a la tarea que se desea eliminar"
                     },
     "taskPriorities" : {"maxPriorityValue" : 5, "minPriorityValue" : 0, "step": 1, "defaultConcreteTaskPriorityValue": 0, "defaultCompositeTaskPriorityValue" : 0}
 }

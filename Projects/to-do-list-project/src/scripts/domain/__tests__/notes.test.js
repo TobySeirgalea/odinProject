@@ -1,4 +1,4 @@
-import defaultValues from "../../appConstantValues.json" with {type: 'json'};
+import defaultValues from "../../../appConstantValues.json" with {type: 'json'};
 import {Note} from "../notes.js";
 
 const noteTitles = ["Distracciones del día", "Ideas"];
@@ -41,4 +41,16 @@ describe('Funcionalidad: Notas pueden tener cuerpo', () => {
     expect(note.bodyEquals(noteBodies[1])).toBeTruthy();
     expect(note.bodyEquals(noteBodies[0])).toBeFalsy();
   });
+  test('Nota puede devolver su titulo', () => {
+    let note = new Note(noteTitles[0], noteBodies[0]); 
+    expect(note.titleEquals(note.getTitle())).toBeTruthy();
+    expect(note.getTitle() === noteTitles[0]).toBeTruthy();
+  });
+  test('Nota puede devolver su cuerpo', () => {
+    let note = new Note(noteTitles[0], noteBodies[0]); 
+    expect(note.bodyEquals(note.getBody())).toBeTruthy();
+    expect(note.getBody() === noteBodies[0]).toBeTruthy();
+  });
+  
+
 });

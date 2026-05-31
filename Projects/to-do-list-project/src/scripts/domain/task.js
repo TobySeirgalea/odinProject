@@ -1,5 +1,5 @@
-import defaultValues from "../appConstantValues.json" with {type: 'json'};
-import {endOfToday, formatISO, isPast, toDate, min} from "date-fns";
+import defaultValues from "../../appConstantValues.json" with {type: 'json'};
+import {endOfToday, formatISO, isPast, toDate, isAfter, isBefore, endOfDay, min, endOfWeek} from "date-fns";
 
 class Task{
     #title;
@@ -8,6 +8,7 @@ class Task{
     #completed;
     #priorityValue;
     static #accessedViaInstanceCreationMethod = false;
+    static defaultDueDate = endOfToday();
 
     static isAValidDueDate(aDueDate){
         return !isPast(aDueDate);
@@ -39,10 +40,6 @@ class Task{
         return CompositeTask.createWith(dependentTasks, aDueDate, aPriorityValue, aTitle, aDescription);
     }
 
-    static createWith(){
-        throw new Error("Subclass should implement this!");
-    }
-
     constructor(aDueDate, aPriorityValue, aTitle, aDescription){
         if (!Task.#accessedViaInstanceCreationMethod){
             throw new Error(defaultValues.errorMessages.cantCreateAnInstanceOfTaskWithoutInstanceCreationMethods);
@@ -50,11 +47,10 @@ class Task{
         Task.#accessedViaInstanceCreationMethod = false;
         this.#title         = aTitle;
         this.#description   = aDescription;
-        if (aDueDate){
-            const formattedDueDate = formatISO(aDueDate, {representation: defaultValues.formatISOOptions.representation,
+        const formattedDueDate = formatISO(aDueDate, {representation: defaultValues.formatISOOptions.representation,
                                                           format: defaultValues.formatISOOptions.format});                                                  
-            this.#dueDate = formattedDueDate;
-        }
+        this.#dueDate = formattedDueDate;
+        
         this.#priorityValue = aPriorityValue;
     }
 
@@ -78,8 +74,20 @@ class Task{
         return this.#completed === true;
     }
 
+    isExpiredBy(aDate){
+        return isAfter(aDate, this.getDueDate());
+    }
+
     priorityEquals(aPriorityValue){
         return this.#priorityValue === aPriorityValue;
+    }
+
+    getTitle(){
+        return this.#title.toString();
+    }
+
+    getDescription(){
+        return this.#description.toString();
     }
 
     titleEquals(aTitle){
@@ -95,9 +103,13 @@ class Task{
                                                         format: defaultValues.formatISOOptions.format});
         return this.#dueDate === formattedDueDate;
     }
-
+    
     getDueDate(){
         return toDate(this.#dueDate);
+    }
+
+    getPriority(){
+        return this.#priorityValue; //Es tipo primitivo asi que se pasa copia
     }
 
     dueDateIsEarlierThan(anotherTask){
@@ -105,7 +117,7 @@ class Task{
     }
     
     dueDateIsAfter(anotherDueDate){
-        return min([this.#dueDate, anotherDueDate]) === anotherDueDate;
+        return isAfter(this.#dueDate, anotherDueDate);
     }
 
     changeTitle(newTitle){
@@ -125,8 +137,7 @@ class ConcreteTask extends Task{
         return new ConcreteTask(aDueDate, aPriorityValue, aTitle, aDescription); 
     }
 
-
-    constructor(aDueDate = toDate(endOfToday), aPriorityValue = defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, aTitle = defaultValues.defaultTaskTitle, aDescription = defaultValues.defaultDescriptionText){        
+    constructor(aDueDate = Task.defaultDueDate, aPriorityValue = defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, aTitle = defaultValues.defaultTaskTitle, aDescription = defaultValues.defaultDescriptionText){        
         if (!ConcreteTask.#accessedViaInstanceCreationMethod){
             throw new Error(defaultValues.errorMessages.cantCreateAnInstanceOfConcreteTaskWithoutInstanceCreationMethods);
         }
@@ -135,14 +146,24 @@ class ConcreteTask extends Task{
         ConcreteTask.assertIsAValidPriorityValue(aPriorityValue, defaultValues.errorMessages.cantCreateTaskWithInvalidPriorityValueErrorMessage);         
         super(aDueDate, aPriorityValue, aTitle, aDescription);        
     }
+
+    //Double dispatch methods
+    addClassToContainerWith(aContainer, aDomController){
+        aDomController.addConcreteTaskClassToContainer(aContainer);
+    }
+
+    renderWith(aDomController){
+        return aDomController.renderConcreteTask(this);
+    }
+
 }
 
 class CompositeTask extends Task{
     #tasks = [];
-
+    #originalDueDate;
     static #accessedViaInstanceCreationMethod = false;
 
-    static createWith(aDependentTasksList = [], aDueDate = CompositeTask.earliestDueDateTask(aDependentTasksList).getDueDate(), aPriorityValue = defaultValues.taskPriorities.defaultCompositeTaskPriorityValue, aTitle=defaultValues.defaultTaskTitle, aDescription=defaultValues.defaultDescriptionText){
+    static createWith(aDependentTasksList = [], aDueDate = Task.defaultDueDate, aPriorityValue = defaultValues.taskPriorities.defaultCompositeTaskPriorityValue, aTitle = defaultValues.defaultTaskTitle, aDescription = defaultValues.defaultDescriptionText){
         CompositeTask.#accessedViaInstanceCreationMethod = true;
         return new CompositeTask(aDependentTasksList, aDueDate, aPriorityValue, aTitle, aDescription);
     }
@@ -165,8 +186,66 @@ class CompositeTask extends Task{
         aDependentTasksList.forEach(task => this.#tasks.push(task));
     }
 
+    markAsCompleted(){
+        if (!this.allComponentTasksAreComplete()){
+            throw new Error(defaultValues.errorMessages.cantCompleteCompositeTaskUntilAllComponentTasksAreCompleted);
+        }
+        super.markAsCompleted();
+    }
+
+    allComponentTasksAreComplete(){
+        return this.#tasks.every(task => task.isCompleted())
+    }
+    
+    isCompleted(){
+        if (this.allComponentTasksAreComplete()){
+            super.markAsCompleted();
+        }
+        return super.isCompleted();
+    }
+
     includesTask(aTask){
         return this.#tasks.includes(aTask);
+    }
+
+    getDueDate(){
+        if (this.#tasks.length !== 0){
+            return this.#tasks.reduce((earliestDueDateTask, currentTask) => min([earliestDueDateTask, currentTask.getDueDate()]),super.getDueDate());
+        }
+        return super.getDueDate();
+    }
+
+    addTask(aTask){
+        this.#tasks.push(aTask);
+    }
+
+    addTasks(aTasksList){
+        aTasksList.forEach(task => this.addTask(task));
+    }
+
+    removeTask(aTask){
+        let initialLength = this.#tasks.length;
+        this.#tasks = this.#tasks.filter(task => task !== aTask);
+        if (this.#tasks.length === initialLength){
+            throw new Error(defaultValues.errorMessages.taskNotPresentInCompositeTask);
+        }
+    }
+
+    removeTasks(aTaskList){
+        aTaskList.forEach(task => this.removeTask(task));
+    }
+
+    dependentsDo(callback){
+        return this.#tasks.map(dependentTask => callback(dependentTask));
+    }
+
+    //Double dispatch methods
+    addClassToContainerWith(aContainer, aDomController){
+        aDomController.addCompositeTaskClassToContainer(aContainer);
+    }
+
+    renderWith(aDomController){
+        return aDomController.renderCompositeTask(this);
     }
 }
 

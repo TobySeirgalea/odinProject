@@ -1,4 +1,4 @@
-import defaultValues from "../appConstantValues.json" with {type: 'json'};
+import defaultValues from "../../appConstantValues.json" with {type: 'json'};
 
 class Note{
     #title;
@@ -30,6 +30,15 @@ class Note{
     titleEquals(aTitle){
         return this.#title === aTitle;
     }
+
+    getTitle(){
+        return String(this.#title);
+    }
+
+    getBody(){
+        return String(this.#body);
+    }
+    
 }
 
 export {Note};
