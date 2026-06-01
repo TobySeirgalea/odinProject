@@ -289,7 +289,8 @@ describe('Funcionalidad: Mostrar formulario de creación de contenido', () => {
     form.remove(form.querySelector("#" + DomController.formFieldsContainer));
   });
   test('submit button close dialog when is pressed', () => {
-    const dom  = new DomController();
+    const appController = {createTaskByFormInfo: () => 1};
+    const dom  = new DomController(appController);
     const form = dom.createContentForm();
     const createNoteButton = form.querySelector('#' + DomController.noteOptionInCreateFormID);
     const createTaskButton = form.querySelector('#' + DomController.taskOptionInCreateFormID);
@@ -301,7 +302,7 @@ describe('Funcionalidad: Mostrar formulario de creación de contenido', () => {
     expect(!form.open).toBeTruthy();
     form.remove(form.querySelector("#" + DomController.formFieldsContainer));
   });
-  test('submit button close dialog when is pressed', () => {
+  test('cancel button close dialog when is pressed', () => {
     const dom  = new DomController();
     const form = dom.createContentForm();
     const createNoteButton = form.querySelector('#' + DomController.noteOptionInCreateFormID);
@@ -311,13 +312,99 @@ describe('Funcionalidad: Mostrar formulario de creación de contenido', () => {
     expect(!form.open).toBeTruthy();
     form.remove(form.querySelector("#" + DomController.formFieldsContainer));
   });
+  test('when notes is selected, submitButton contains correct text', () => {
+    const dom  = new DomController();
+    const form = dom.createContentForm();
+    const createNoteButton = form.querySelector('#' + DomController.noteOptionInCreateFormID);
+    createNoteButton.click();
+    assertContainerHasElement(form, 'button', DomController.creationFormSubmitButtonID);
+    const submitButton = form.querySelector("#" + DomController.creationFormSubmitButtonID); 
+    expect(submitButton.textContent === DomController.createNoteButtonText).toBeTruthy();
+    expect(submitButton.getAttribute('type') === 'submit').toBeTruthy();
+    createNoteButton.click();
+    form.remove(form.querySelector("#" + DomController.formFieldsContainer));
+  });
+  test('when notes is selected form contains just one submitButton', () => {
+    const dom  = new DomController();
+    const form = dom.createContentForm();
+    const createNoteButton = form.querySelector('#' + DomController.noteOptionInCreateFormID);
+    createNoteButton.click();
+    assertContainerHasElement(form, 'button', DomController.creationFormSubmitButtonID);
+    createNoteButton.click();
+    expect(form.querySelectorAll("#" + DomController.creationFormSubmitButtonID).length === 1).toBeTruthy();
+    form.remove(form.querySelector("#" + DomController.formFieldsContainer));
+  });
+  test('when tasks is selected, submitButton contains correct text', () => {
+    const dom  = new DomController();
+    const form = dom.createContentForm();
+    const createTaskButton = form.querySelector('#' + DomController.taskOptionInCreateFormID);
+    createTaskButton.click();
+    assertContainerHasElement(form, 'button', DomController.creationFormSubmitButtonID);
+    const submitButton = form.querySelector("#" + DomController.creationFormSubmitButtonID); 
+    expect(submitButton.textContent === DomController.createTaskButtonText).toBeTruthy();
+    expect(submitButton.getAttribute('type') === 'submit').toBeTruthy();
+    form.remove(form.querySelector("#" + DomController.formFieldsContainer));
+  });
+ test('when notes is selected form contains just one submitButton', () => {
+    const dom  = new DomController();
+    const form = dom.createContentForm();
+    const createTaskButton = form.querySelector('#' + DomController.taskOptionInCreateFormID);
+    createTaskButton.click();
+    assertContainerHasElement(form, 'button', DomController.creationFormSubmitButtonID);
+    createTaskButton.click();
+    expect(form.querySelectorAll("#" + DomController.creationFormSubmitButtonID).length === 1).toBeTruthy();
+    form.remove(form.querySelector("#" + DomController.formFieldsContainer));
+  });
+  test('after filling a task and pressing submit button dom controller returns form data', () => {
+    let formOutput;
+    const appControllerMock = {createTaskByFormInfo: (formInfo) => {
+      formOutput = formInfo;
+      }
+    };
+    const dom  = new DomController(appControllerMock);
+    const form = dom.createContentForm();
+    const createTaskButton = form.querySelector('#' + DomController.taskOptionInCreateFormID);
+    createTaskButton.click();
+    fillTaskForm(form, DomController.formsFieldsContainerID);
+    const submitButton = form.querySelector('#' + DomController.creationFormSubmitButtonID);
+    submitButton.click();
+    expect(formOutput.title).toBe("taskTitle");
+    expect(formOutput.description).toBe("taskDescription");
+    expect(formOutput.dueDate).toBe(new Date().toISOString().split('T')[0]);
+    expect(Number(formOutput.priorityValue)).toBe(defaultValues.taskPriorities.minPriorityValue);
+    form.remove(form.querySelector("#" + DomController.formFieldsContainer));
+  });
+  test('after filling a note and pressing submit button dom controller returns form data', () => {
+    let formOutput;
+    const appControllerMock = {createNoteByFormInfo: (formInfo) => {
+      console.log("llegue");
+      formOutput = formInfo;
+      }
+    };
+    const dom  = new DomController(appControllerMock);
+    const form = dom.createContentForm();
+    const createNoteButton = form.querySelector('#' + DomController.noteOptionInCreateFormID);
+    createNoteButton.click();
+    fillNoteForm(form, DomController.formsFieldsContainerID);
+    const submitButton = form.querySelector('#' + DomController.creationFormSubmitButtonID);
+    submitButton.click();
+    expect(formOutput.title).toBe("noteTitle");
+    expect(formOutput.body).toBe("noteBody");
+    form.remove(form.querySelector("#" + DomController.formFieldsContainer));
+  });
 });
+
+function fillNoteForm(form, formFieldsContainerID){
+  const formFieldsContainer = form.querySelector("#" + DomController.formsFieldsContainerID);
+  formFieldsContainer.querySelector('#' + DomController.noteFormTitleInputID).value = 'noteTitle';
+  formFieldsContainer.querySelector('#' + DomController.noteFormBodyInputID).value = 'noteBody';  
+}
 
 function fillTaskForm(form, formsFieldsContainerID){
   const formFieldsContainer = form.querySelector("#" + formsFieldsContainerID);
   formFieldsContainer.querySelector("#" + DomController.taskFormTitleInputID).value = "taskTitle";
   formFieldsContainer.querySelector("#" + DomController.taskFormDescriptionInputID).value = "taskDescription";
-  formFieldsContainer.querySelector("#" + DomController.taskFormDueDateInputID).value = new Date();
+  formFieldsContainer.querySelector("#" + DomController.taskFormDueDateInputID).value = new Date().toISOString().split('T')[0];
   formFieldsContainer.querySelector("#" + DomController.taskFormPriorityValueSelectInputID).value = defaultValues.taskPriorities.minPriorityValue; 
 }
 
@@ -338,26 +425,65 @@ function assertFormContainerDefined(form, containerID){
 }
 
 function assertNoteCreationFormHasAllNeededFields(formFieldsContainer){
-  expect(hasInputElementWithLabelFor(formFieldsContainer, DomController.noteFormTitleInputID, "input", "text")).toBeTruthy();
-  expect(hasInputElementWithLabelFor(formFieldsContainer, DomController.noteFormBodyInputID, "textarea", "text")).toBeTruthy();
+  expect(hasInputElementWithLabelFor(formFieldsContainer, DomController.noteFormTitleInputID, "input", DomController.noteTitleLabelText, "text")).toBeTruthy();
+  expect(hasInputElementWithLabelFor(formFieldsContainer, DomController.noteFormBodyInputID, "textarea", DomController.noteBodyLabelText, "text")).toBeTruthy();
 }
 
 function assertTaskCreationFormHasAllNeededFields(formFieldsContainer){
-  expect(hasInputElementWithLabelFor(formFieldsContainer, DomController.taskFormTitleInputID, "input", "text")).toBeTruthy();
-  expect(hasInputElementWithLabelFor(formFieldsContainer, DomController.taskFormDescriptionInputID, "textarea", "text")).toBeTruthy();
-  expect(hasInputElementWithLabelFor(formFieldsContainer, DomController.taskFormDueDateInputID, "input", "date")).toBeTruthy();
-  expect(hasInputElementWithLabelFor(formFieldsContainer, DomController.taskFormPriorityValueSelectInputID, "select")).toBeTruthy();
+  expect(hasInputElementWithLabelFor(formFieldsContainer, DomController.taskFormTitleInputID, "input", DomController.taskTitleLabelText,"text")).toBeTruthy();
+  expect(hasInputElementWithLabelFor(formFieldsContainer, DomController.taskFormDescriptionInputID, "textarea", DomController.taskFormDescriptionLabelText, "text")).toBeTruthy();
+  expect(hasInputElementWithLabelFor(formFieldsContainer, DomController.taskFormDueDateInputID, "input", DomController.taskFormDueDateLabelText, "date")).toBeTruthy();
+  assertDefaultDueDateValueIsToday(formFieldsContainer);
+  expect(hasInputElementWithLabelFor(formFieldsContainer, DomController.taskFormPriorityValueSelectInputID, "select", DomController.taskFormPriorityValueLabelText)).toBeTruthy();
+  assertSelectHasCorrectOptionsAndTextContent(formFieldsContainer);
 }
 
-function hasInputElementWithLabelFor(form, id, inputElementTag, type=null){
-  let satisfied = 0;
+function assertDefaultDueDateValueIsToday(formFieldsContainer){
+  const todaysDate = new Date().toISOString().split('T')[0];
+  expect(String(formFieldsContainer.querySelector('#' + DomController.taskFormDueDateInputID).value) === String(todaysDate)).toBeTruthy();
+}
+
+function assertSelectHasCorrectOptionsAndTextContent(formFieldsContainer) {
+  const select = formFieldsContainer.querySelector('#' + DomController.taskFormPriorityValueSelectInputID);
+  const options = select.options;
+  const possiblePriorityValues = getPossiblePriorityValues();
+  let allSelectValuesAreValidPriorityValues = true;
+  for (const option of options) {
+    allSelectValuesAreValidPriorityValues &= possiblePriorityValues.includes(Number(option.value)) && option.value == option.textContent;
+  }
+  expect(allSelectValuesAreValidPriorityValues).toBeTruthy();
+}
+
+function getPossiblePriorityValues() {
+  const possiblePriorityValues = [];
+  for (let priorityValue = defaultValues.taskPriorities.minPriorityValue; priorityValue < defaultValues.taskPriorities.maxPriorityValue; priorityValue += defaultValues.taskPriorities.step) {
+    possiblePriorityValues.push(priorityValue);
+  }
+  return possiblePriorityValues;
+}
+
+function hasInputElementWithLabelFor(form, id, inputElementTag, labelText, type=null){
+  let satisfied = false;
   for (const container of form.children){
     for (const child of container.children){
-      satisfied += (child.tagName.toLowerCase() === inputElementTag && child.getAttribute("id") === id && (child.getAttribute("type") === type || null));
-      satisfied += (child.tagName.toLowerCase() === "label" && child.getAttribute("for") === id);
+      let label = container.children[0];
+      let input = container.children[1];
+      satisfied |= (elementHasTag(input, inputElementTag) && elementHasID(input, id) && (input.getAttribute("type") === type || null)) &&(elementHasTag(label, "label") && label.getAttribute("for") === id) && elementHasTextContent(label, labelText);
     }
   }
-  return satisfied === 2;
+  return satisfied;
+}
+
+function elementHasTextContent(element, textContent){
+  return element.textContent === textContent;
+}
+
+function elementHasID(element, id){
+  return element.getAttribute('id', id);
+}
+
+function elementHasTag(element, tag){
+  return element.tagName.toLowerCase() === tag;
 }
 
 //Test helpers

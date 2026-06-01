@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   testEnvironment: 'jsdom',  // Si pruebas código que usa DOM
   transform: {
     '^.+\\.js$': 'babel-jest',  // Usa Babel para transformar archivos JS

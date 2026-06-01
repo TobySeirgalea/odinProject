@@ -23,7 +23,7 @@ class DomController {
 
     static taskOptionInCreateFormID    = "taskOptionInCreateForm";
     static noteOptionInCreateFormID    = "noteOptionInCreateForm";
-    static formFieldsContainer         = "formFieldsContainer";
+    static formFieldsContainerID       = "formFieldsContainer";
     static taskFormTitleInputID        = "taskFormTitleInput";
     static formFieldContainerClass     = "formFieldContainer";
     static taskFormDescriptionInputID  = "formDescriptionInput";
@@ -33,8 +33,21 @@ class DomController {
     static noteFormBodyInputID         = "noteFormBodyInput";
     static creationFormSubmitButtonID  = "creationFormSubmitButton";
     static cancelCreationFormButtonID  = "cancelCreationFormButton";
+    static createNoteButtonText        = "Create note"; 
+    static createTaskButtonText        = "Create task";
     static taskFormPriorityValueSelectInputID = "formPriorityValueInput";
+    static taskTitleLabelText = "Title: ";
+    static taskFormDescriptionLabelText = "Description: ";
+    static taskFormDueDateLabelText = "Due date: ";
+    static taskFormPriorityValueLabelText = "Priority value: ";
+    static noteTitleLabelText = "Title: ";
+    static noteBodyLabelText  = "Body: ";
+    #appController;
     
+    constructor(appsController){
+        this.#appController = appsController;
+    }
+
     createContentForm(){
         const formContainer  = document.createElement("dialog");
         const form           = document.createElement("form");
@@ -42,6 +55,7 @@ class DomController {
         const noteFormButton = document.createElement("button");
         const cancelButton   = document.createElement("button");
 
+        form.setAttribute('id', DomController.formFieldsContainerID);
         taskFormButton.setAttribute('id', DomController.taskOptionInCreateFormID);
         noteFormButton.setAttribute('id', DomController.noteOptionInCreateFormID);
         cancelButton.setAttribute('id', DomController.cancelCreationFormButtonID);
@@ -59,24 +73,8 @@ class DomController {
         return formContainer;
     }
 
-    submitCreationForm(form, event, formDialog){
-        event.preventDefault();
-        const data = new FormData(form);
-        console.log(data);
-        form.submit();
-    }
-
     ensureElementIsEmptyInside(element){
         element.innerHTML = '';
-    }
-
-    createSubmitButtonFor(form, formContainer){
-        const submitButton   = document.createElement("button");
-        submitButton.textContent = 'Create';
-        submitButton.setAttribute('id', DomController.creationFormSubmitButtonID);
-        submitButton.setAttribute('type', 'submit');
-        submitButton.addEventListener("click", (event) => this.submitCreationForm(form, event, formContainer));
-        formContainer.appendChild(submitButton);
     }
 
     showNoteCreationForm(form, formContainer){
@@ -84,20 +82,83 @@ class DomController {
         this.ensureElementIsEmptyInside(noteFormContainer);
         noteFormContainer.setAttribute('id', DomController.formFieldsContainer);
         this.appendChildsToElement(noteFormContainer, [
-            this.createFormInputElementWithLabel('input', DomController.noteFormTitleInputID, "text"),
-            this.createFormInputElementWithLabel('textarea', DomController.noteFormBodyInputID, 'text')
+            this.createFormInputElementWithLabel('input', DomController.noteFormTitleInputID, DomController.noteTitleLabelText,"text"),
+            this.createFormInputElementWithLabel('textarea', DomController.noteFormBodyInputID, DomController.noteBodyLabelText, 'text')
         ]);
         form.appendChild(noteFormContainer);
-        this.ensureToHaveSubmitButton(form, formContainer);
+        this.createSubmitButtonForNote(form, formContainer);
     }
 
-    createFormInputElementWithLabel(elementsTag, elementsID, elementsInputType=null){
+    createSubmitButtonWithMessage(formContainer, message){
+        const currentSubmitButton = formContainer.querySelector('#' + DomController.creationFormSubmitButtonID);
+        if (currentSubmitButton) formContainer.removeChild(currentSubmitButton); 
+        const submitButton   = document.createElement("button");
+        submitButton.textContent = 'Create';
+        submitButton.setAttribute('id', DomController.creationFormSubmitButtonID);
+        submitButton.setAttribute('type', 'submit');
+        submitButton.textContent = message;
+        formContainer.appendChild(submitButton);
+        return submitButton;
+    }
+
+    createSubmitButtonForNote(form, formContainer){
+        const button = this.createSubmitButtonWithMessage(form, DomController.createNoteButtonText);
+        button.addEventListener("click", (event) => this.sendNoteToAppController(form, formContainer));
+    }
+
+    createSubmitButtonForTask(form, formContainer){
+        const button = this.createSubmitButtonWithMessage(form, DomController.createTaskButtonText);
+        button.addEventListener("click", (event) => this.sendTaskToAppController(form, formContainer));
+    }
+
+    sendNoteToAppController(form, formDialog){
+        const data = this.collectUserInputOfNoteForm(form);
+        formDialog.remove();
+        this.#appController.createNoteByFormInfo(data);
+    }
+
+    collectUserInputOfNoteForm(form){
+        return {
+            title: form.querySelector('#' + DomController.noteFormTitleInputID).value,
+            body: form.querySelector('#' + DomController.noteFormBodyInputID).value
+        };
+    }
+
+    sendTaskToAppController(form, formDialog){
+        const data = this.collectUserInputOfTaskForm(form);
+        formDialog.remove();
+        this.#appController.createTaskByFormInfo(data);
+    }
+
+    collectUserInputOfTaskForm(form){
+        return {
+            title: form.querySelector('#' + DomController.taskFormTitleInputID).value,
+            description: form.querySelector('#' + DomController.taskFormDescriptionInputID).value,
+            dueDate: form.querySelector('#' + DomController.taskFormDueDateInputID).value,
+            priorityValue: form.querySelector('#' + DomController.taskFormPriorityValueSelectInputID).value
+        }
+    }
+
+    createInputDateField(){
+        const dateInputField = this.createFormInputElementWithLabel('input', DomController.taskFormDueDateInputID, DomController.taskFormDueDateLabelText, "date");
+        const input = dateInputField.querySelector('#' + DomController.taskFormDueDateInputID);
+        input.setAttribute('min', this.todaysDateAsString());
+        input.setAttribute('value', this.todaysDateAsString());
+        return dateInputField;
+    }
+
+    todaysDateAsString(){
+        return new Date().toISOString().split('T')[0];
+    }
+
+    createFormInputElementWithLabel(elementsTag, elementsID, labelTextContent, elementsInputType=null){
         let fieldContainer = document.createElement("div");
         let label          = document.createElement("label");
         const element      = document.createElement(elementsTag);
         
         fieldContainer.classList.add(DomController.formFieldContainerClass);
         
+        label.textContent = labelTextContent;
         label.setAttribute("for", elementsID);
         element.setAttribute("id", elementsID);
         if (elementsInputType) element.setAttribute("type", elementsInputType);
@@ -120,22 +181,16 @@ class DomController {
         this.ensureElementIsEmptyInside(taskFormContainer);
         taskFormContainer.setAttribute("id", DomController.formFieldsContainer);
         this.appendChildsToElement(taskFormContainer, [
-            this.createFormInputElementWithLabel("input", DomController.taskFormTitleInputID, "text"),
-            this.createFormInputElementWithLabel("textarea", DomController.taskFormDescriptionInputID, "text"),
-            this.createFormInputElementWithLabel("input", DomController.taskFormDueDateInputID, "date"),
-            this.createFormInputElementWithLabel("select", DomController.taskFormPriorityValueSelectInputID)
+            this.createFormInputElementWithLabel("input", DomController.taskFormTitleInputID, DomController.taskTitleLabelText,"text"),
+            this.createFormInputElementWithLabel("textarea", DomController.taskFormDescriptionInputID, DomController.taskFormDescriptionLabelText, "text"),
+            this.createInputDateField(),
+            this.createFormInputElementWithLabel("select", DomController.taskFormPriorityValueSelectInputID, DomController.taskFormPriorityValueLabelText)
         ]);
         const selectElement = taskFormContainer.querySelector("#" + DomController.taskFormPriorityValueSelectInputID);
         this.appendChildsToElement(selectElement, this.generateOptionsForPriorityValues());
         
         form.appendChild(taskFormContainer);
-        this.ensureToHaveSubmitButton(form, formContainer);
-    }
-
-    ensureToHaveSubmitButton(form, formContainer) {
-        if (!formContainer.querySelector("#" + DomController.creationFormSubmitButtonID)) {
-            this.createSubmitButtonFor(form, formContainer);
-        }
+        this.createSubmitButtonForTask(form, formContainer);
     }
 
     generateOptionsForPriorityValues(){
@@ -143,6 +198,7 @@ class DomController {
         for (let priorityValue = defaultValues.taskPriorities.minPriorityValue; priorityValue < defaultValues.taskPriorities.maxPriorityValue; priorityValue += defaultValues.taskPriorities.step){
             let option = document.createElement("option");
             option.setAttribute("value", priorityValue);
+            option.textContent = priorityValue;
             options.push(option);
         }
         return options;
