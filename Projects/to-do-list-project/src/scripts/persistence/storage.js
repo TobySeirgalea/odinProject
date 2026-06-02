@@ -195,7 +195,13 @@ class notPersistentStorage extends Storage{
         return this.#contains('tasks', task);
     }
 
+    #contains(key, item){
+        return this.#storage[key].contains(item);
+    }
+
     isAvailable(){
         return true;
     }
 }
+
+export { LocalStorage, notPersistentStorage };

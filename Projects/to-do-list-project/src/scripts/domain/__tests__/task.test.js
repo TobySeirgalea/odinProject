@@ -14,7 +14,7 @@ const taskTitles = ["Lavar ropa", "Cerrar redes sociales", "Dar de comer al perr
 const taskDescriptions = ["Usar modo eco y jabón para ropa blanca", "Eliminar mis cuentas de Instagram y Twitter"];
 const invalidDate = -1;
 const taskDueDates = [invalidDate, toDate(addYears(new Date(), 5)), toDate(addDays(new Date(), 4))];
-const tasksMocks = [Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.minPriorityValue, taskTitles[0], taskDescriptions[0])];
+const tasksMocks = [Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.minPriorityValue, taskTitles[0], taskDescriptions[0]), Task.createConcreteTask(taskDueDates[2], defaultValues.taskPriorities.maxPriorityValue, taskTitles[2], 'Darle doguis con leche'), Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.maxPriorityValue, taskTitles[1], taskDescriptions[1])];
 
 //Task tests
 describe('Funcionalidad: Crear una tarea', () => {
@@ -207,6 +207,32 @@ describe('Funcionalidad: Las tareas se vencen pasada su fecha límite', () => {
         expect(task.isExpiredBy(toDate(endOfDay(testDate)))).toBeTruthy(); 
     });
 });
+
+describe('Funcionalidad: Al añadir una tarea a otra se convierte en compositeTask con el mismo contenido', () => {
+    test('añadir tarea a otra', () => {
+        const task = tasksMocks[0];
+        const anotherTask = tasksMocks[1];
+        const compositeTask = task.addTask(anotherTask);
+        expect(compositeTask.titleEquals(task.getTitle())).toBeTruthy();
+        expect(compositeTask.descriptionEquals(task.getDescription())).toBeTruthy();
+        expect(compositeTask.dueDateEquals(task.getDueDate())).toBeTruthy();
+        expect(compositeTask.priorityEquals(task.getPriority())).toBeTruthy();
+        expect(compositeTask.includesTask(anotherTask)).toBeTruthy();
+    });
+    test('añadir varias tareas a otra', () => {
+        const task = tasksMocks[0];
+        const anotherTask = tasksMocks[1];
+        const oneMoreTask = tasksMocks[2];
+        const compositeTask = task.addTasks([anotherTask, oneMoreTask]);
+        expect(compositeTask.titleEquals(task.getTitle())).toBeTruthy();
+        expect(compositeTask.descriptionEquals(task.getDescription())).toBeTruthy();
+        expect(compositeTask.dueDateEquals(task.getDueDate())).toBeTruthy();
+        expect(compositeTask.priorityEquals(task.getPriority())).toBeTruthy();
+        expect(compositeTask.includesTask(anotherTask)).toBeTruthy();
+        expect(compositeTask.includesTask(oneMoreTask)).toBeTruthy();
+    });
+});
+
 //Una forma de generar otro priorityValue válido
 function getADifferentPriorityValueFrom(aPriorityValue){
     const nextPriorityValue = aPriorityValue + defaultValues.taskPriorities.step;

@@ -1,27 +1,26 @@
-import { Task, ConcreteTask, CompositeTask } from "./domain/task.js";
-import { Note } from "./domain/notes.js";
-
-class AppController{
+import { Task, ConcreteTask, CompositeTask } from "../domain/task.js";
+import { Note } from "../domain/notes.js";
+import { LocalStorage, notPersistentStorage } from "../persistence/storage.js";
+import { DomController } from "./domController.js";
+export class AppController{
     #storage;
     #dom;
-    constructor(storageUnit, dom){
-        this.#dom     = dom;
+    constructor(){
+        this.#dom     = new DomController(this);
         this.#storage = new LocalStorage(this);
         if (!this.#storage.isAvailable()){
             const wantsToContinue = this.#dom.informUserAndAskIfWantsToContinue();
             this.#storage = new notPersistentStorage();
-        }
+        }        
     }
 
     deleteNote(formFieldsAndData){
         const noteReplica = new Note(formFieldsAndData.title, formFieldsAndData.description);
-
         this.#storage.deleteNote(noteReplica);
     }
 
     deleteTask(formFieldsAndData){
         const taskReplica    = Task.createConcreteTask(formFieldsAndData.dueDate, formFieldsAndData.priorityValue, formFieldsAndData.title, formFieldsAndData.description);
-
         this.#storage.deleteTask(taskReplica);
     }
 
@@ -53,11 +52,11 @@ class AppController{
 
     displayTasks(){
         const savedTasks = this.#storage.getAllTasks();
-        savedTasks.forEach(task => this.#dom.renderTask(task));
+        savedTasks.forEach(task => this.#dom.displayTask(task));
     }
 
     displayNotes(){
         const savedNotes = this.#storage.getAllNotes();
-        savedNotes.forEach(note => this.#dom.renderNote(note));
+        savedNotes.forEach(note => this.#dom.displayNote(note));
     }
 }

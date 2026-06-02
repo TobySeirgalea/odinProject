@@ -127,6 +127,7 @@ class Task{
     changeDescription(newDescription){
         this.#description = newDescription;
     }
+
 }
 
 class ConcreteTask extends Task{
@@ -147,13 +148,21 @@ class ConcreteTask extends Task{
         super(aDueDate, aPriorityValue, aTitle, aDescription);        
     }
 
-    //Double dispatch methods
-    addClassToContainerWith(aContainer, aDomController){
-        aDomController.addConcreteTaskClassToContainer(aContainer);
+    addTask(aTask){
+        return Task.createCompositeTask([aTask], this.getDueDate(), this.getPriority(), this.getTitle(), this.getDescription());
     }
 
-    renderWith(aDomController){
-        return aDomController.renderConcreteTask(this);
+    addTasks(aTaskList){
+        return Task.createCompositeTask(aTaskList, this.getDueDate(), this.getPriority(), this.getTitle(), this.getDescription());
+    }
+
+    //Double dispatch methods
+    addClassToContainerWith(aContainer, aDomRenderizer){
+        aDomRenderizer.addConcreteTaskClassToContainer(aContainer);
+    }
+
+    renderWith(aDomRenderizer, anEditionHandler, aDeleteHandler){
+        return aDomRenderizer.renderConcreteTask(this, anEditionHandler, aDeleteHandler);
     }
 
 }
@@ -240,12 +249,12 @@ class CompositeTask extends Task{
     }
 
     //Double dispatch methods
-    addClassToContainerWith(aContainer, aDomController){
-        aDomController.addCompositeTaskClassToContainer(aContainer);
+    addClassToContainerWith(aContainer, aDomRenderizer){
+        aDomRenderizer.addCompositeTaskClassToContainer(aContainer);
     }
 
-    renderWith(aDomController){
-        return aDomController.renderCompositeTask(this);
+    renderWith(aDomRenderizer){
+        return aDomRenderizer.renderCompositeTask(this);
     }
 }
 
