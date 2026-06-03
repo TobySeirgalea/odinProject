@@ -11,7 +11,13 @@
                        "cantCreateAnInstanceOfTaskWithoutInstanceCreationMethods" : "No se puede crear una instancia de Task si no es utilizando los métodos de creación de instancia",
                        "cantCreateAnInstanceOfConcreteTaskWithoutInstanceCreationMethods" : "No se puede crear una instancia de Task si no es utilizando los métodos de creación de instancia",
                        "cantCompleteCompositeTaskUntilAllComponentTasksAreCompleted" : "No se puede completar una CompositeTasks si no fueron completadas todas las internas",
-                       "taskNotPresentInCompositeTask" : "La CompositeTask no incluye a la tarea que se desea eliminar"
+                       "taskNotPresentInCompositeTask" : "La CompositeTask no incluye a la tarea que se desea eliminar",
+                       "cantHaveCiclesInDependencesErrorMessage" : "No se puede definir una tareas si existe un ciclos de dependencias",
+                       "cantHaveDependentsTasksWithOwnTitle" : "No se puede crear una tarea que tenga como dependiente a otra de su mismo título",
+                       "cantHaveTaskWithTheSameTitleInDependents" : "No se puede crear una tarea que tenga dependientes que compartan título",
+                       "cantAddATaskWithTheSameTitle" : "No se puede añadir una tarea a otra si tienen el mismo título",
+                       "cantAddTaskWithTheSameTitleOfADependent" : "No se puede añadir tarea a otra si esta tiene una de la que depende del mismo título",
+                       "cantCreateANoteWithoutTitle" : "No se puede crear notas sin título"
                     },
     "taskPriorities" : {"maxPriorityValue" : 5, "minPriorityValue" : 0, "step": 1, "defaultConcreteTaskPriorityValue": 0, "defaultCompositeTaskPriorityValue" : 0}
 }

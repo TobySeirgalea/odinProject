@@ -10,7 +10,7 @@ const renderedTask = document.createElement('div');
 renderedTask.setAttribute('id', 'testRenderedTask');
 
 describe('Funcionalidad: agrega tarea renderizada al contenedor apropiado', () => {
-  test('Nombre test', () => {
+  test('agrega concreteTask renderizada', () => {
     const domRenderizer = {
      renderTask: jest.fn().mockReturnValue(renderedTask)
     };

@@ -10,6 +10,10 @@ class Task{
     static #accessedViaInstanceCreationMethod = false;
     static defaultDueDate = endOfToday();
 
+    static convertDueDateToISOFormat(aDueDate){
+        return aDueDate.toISOString().split('T')[0];
+    }
+
     static isAValidDueDate(aDueDate){
         return !isPast(aDueDate);
     }
@@ -35,8 +39,21 @@ class Task{
         return ConcreteTask.createWith(aDueDate, aPriorityValue, aTitle, aDescription);
     }
 
+    static assertAllTasksDifferInTitle(dependentTasks){
+        if (new Set(dependentTasks.map(dependentTask => dependentTask.getTitle())).size !== dependentTasks.length){
+            throw new Error(defaultValues.errorMessages.cantHaveTaskWithTheSameTitleInDependents);
+        }
+    }
+
+    static assertAllTasksOfListHaveTitleDifferentTo(aTitle, dependentTasks){
+        if (dependentTasks.some(dependentTask => dependentTask.getTitle() === aTitle)) throw new Error(defaultValues.errorMessages.cantHaveDependentsTasksWithOwnTitle);
+    }
+
     static createCompositeTask(dependentTasks, aDueDate, aPriorityValue, aTitle, aDescription){
         Task.#accessedViaInstanceCreationMethod = true;    
+        if (!Array.isArray(dependentTasks) || dependentTasks.length === 0) return ConcreteTask.createWith(aDueDate, aPriorityValue, aTitle, aDescription);
+        Task.assertAllTasksOfListHaveTitleDifferentTo(aTitle, dependentTasks);
+        Task.assertAllTasksDifferInTitle(dependentTasks);
         return CompositeTask.createWith(dependentTasks, aDueDate, aPriorityValue, aTitle, aDescription);
     }
 
@@ -70,6 +87,10 @@ class Task{
         this.#completed = true;
     }
 
+    markAsUncompleted(){
+        this.#completed = false;
+    }
+
     isCompleted(){
         return this.#completed === true;
     }
@@ -90,10 +111,6 @@ class Task{
         return this.#description.toString();
     }
 
-    titleEquals(aTitle){
-        return this.#title === aTitle;
-    }
-
     descriptionEquals(aDescription){
         return this.#description === aDescription;
     }
@@ -105,7 +122,7 @@ class Task{
     }
     
     getDueDate(){
-        return toDate(this.#dueDate);
+        return Task.convertDueDateToISOFormat(toDate(this.#dueDate));
     }
 
     getPriority(){
@@ -116,6 +133,10 @@ class Task{
         return anotherTask.dueDateIsAfter(Object.assign({},this.#dueDate));
     }
     
+    titleEquals(aTitle){
+        return this.#title === aTitle;
+    }
+
     dueDateIsAfter(anotherDueDate){
         return isAfter(this.#dueDate, anotherDueDate);
     }
@@ -128,6 +149,9 @@ class Task{
         this.#description = newDescription;
     }
 
+    isEqualOrContains(anotherTask){
+        return this === anotherTask;
+    }
 }
 
 class ConcreteTask extends Task{
@@ -172,7 +196,7 @@ class CompositeTask extends Task{
     #originalDueDate;
     static #accessedViaInstanceCreationMethod = false;
 
-    static createWith(aDependentTasksList = [], aDueDate = Task.defaultDueDate, aPriorityValue = defaultValues.taskPriorities.defaultCompositeTaskPriorityValue, aTitle = defaultValues.defaultTaskTitle, aDescription = defaultValues.defaultDescriptionText){
+    static createWith(aDependentTasksList, aDueDate = Task.defaultDueDate, aPriorityValue = defaultValues.taskPriorities.defaultCompositeTaskPriorityValue, aTitle = defaultValues.defaultTaskTitle, aDescription = defaultValues.defaultDescriptionText){
         CompositeTask.#accessedViaInstanceCreationMethod = true;
         return new CompositeTask(aDependentTasksList, aDueDate, aPriorityValue, aTitle, aDescription);
     }
@@ -219,16 +243,24 @@ class CompositeTask extends Task{
 
     getDueDate(){
         if (this.#tasks.length !== 0){
-            return this.#tasks.reduce((earliestDueDateTask, currentTask) => min([earliestDueDateTask, currentTask.getDueDate()]),super.getDueDate());
+            return Task.convertDueDateToISOFormat(this.#tasks.reduce((earliestDueDateTask, currentTask) => min([earliestDueDateTask, currentTask.getDueDate()]), super.getDueDate()));
         }
         return super.getDueDate();
     }
 
+    isEqualOrContains(anotherTask){
+        return super.isEqualOrContains(anotherTask) || this.#tasks.some(dependent => dependent.isEqualOrContains(anotherTask));
+    }
+
     addTask(aTask){
+        if (aTask.isEqualOrContains(this)) throw new Error(defaultValues.errorMessages.cantHaveCiclesInDependencesErrorMessage);
+        if (aTask.getTitle() === this.getTitle()) throw new Error(defaultValues.errorMessages.cantAddATaskWithTheSameTitle);
+        if (this.#tasks.some(task => task.getTitle() === aTask.getTitle())) throw new Error(defaultValues.errorMessages.cantAddTaskWithTheSameTitleOfADependent)
         this.#tasks.push(aTask);
     }
 
     addTasks(aTasksList){
+        Task.assertAllTasksDifferInTitle(aTasksList);
         aTasksList.forEach(task => this.addTask(task));
     }
 
@@ -238,10 +270,19 @@ class CompositeTask extends Task{
         if (this.#tasks.length === initialLength){
             throw new Error(defaultValues.errorMessages.taskNotPresentInCompositeTask);
         }
+        if (this.#tasks.length === 0) return Task.createConcreteTask(this.getDueDate(), this.getPriority(), this.getTitle(), this.getDescription());
+        return this;
     }
 
     removeTasks(aTaskList){
-        aTaskList.forEach(task => this.removeTask(task));
+        if (this.#tasks.every(task => aTaskList.includes(task))){
+            this.#tasks = [];
+            return Task.createConcreteTask(this.getDueDate(), this.getPriority(), this.getTitle(), this.getDescription());
+        } 
+        else{
+            aTaskList.forEach(task => this.removeTask(task));
+            return this;
+        }
     }
 
     dependentsDo(callback){

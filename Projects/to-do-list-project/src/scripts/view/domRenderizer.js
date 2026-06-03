@@ -51,7 +51,14 @@ class DomRenderizer {
     static editTaskButtonID = "taskEditButtonID";
     static deleteTaskButtonID = 'deleteTaskButton';
     static deleteTaskButtonTextContent = 'Delete task';
-
+    static tasksResumeClass = "tasksResume";
+    static tasksResumeCheckboxID = "taskResumeCheckbox";
+    static tasksResumeTitleID = "taskResumeTitle";
+    static tasksResumePriorityValueID = 'tasksResumePriorityValue';
+    static noteDateClass = "notesDate";
+    static renderedTaskInfoNavBarID = "renderedTaskInfoNavBar";
+    static renderedTaskInfoNavBarSubtaskButtonID = 'renderedTaskInfoNavBarSubtaskButton';
+    static renderedTaskInfoNavBarSubtaskButtonTextContent = 'Subtasks';
 
     renderCreateButton(createButtonHandler){
         const createButton = document.createElement('button');
@@ -200,8 +207,17 @@ class DomRenderizer {
 
     renderNote(note, editionHandler, deleteHandler){
         const noteContainer = document.createElement(DomRenderizer.containersElementTag);
-        this.appendChildsToElement(noteContainer, [this.createTitleElement(note, DomRenderizer.elementsTagForNotesTitles, DomRenderizer.noteTitleClass), this.createNoteBodyElement(note), this.createNoteEditionButton(editionHandler), this.createNoteDeleteButton(deleteHandler)]);
+        this.appendChildsToElement(noteContainer, [this.createTitleElement(note, DomRenderizer.elementsTagForNotesTitles, DomRenderizer.noteTitleClass), this.createNoteBodyElement(note), this.createNoteEditionButton(editionHandler), this.createNoteDeleteButton(deleteHandler), this.createNoteDateElement(note)]);
         return noteContainer;
+    }
+
+    createNoteDateElement(note){
+        const dateElement = document.createElement('input');
+        dateElement.setAttribute('type', 'date');
+        dateElement.setAttribute('readonly', 'true');
+        dateElement.textContent = note.getDate();
+        this.addClassToClassListOf(dateElement, DomRenderizer.noteDateClass);
+        return dateElement;
     }
 
     createNoteEditionButton(editionHandler){
@@ -231,6 +247,47 @@ class DomRenderizer {
         return button;
     }
 
+    createTaskResumeCheckboxFor(aTask){
+        const checkbox = document.createElement('input');
+        checkbox.setAttribute('type', 'checkbox');
+        checkbox.setAttribute('id', DomRenderizer.tasksResumeCheckboxID);
+        checkbox.checked = aTask.isCompleted();
+        checkbox.addEventListener('click', (event) => { //Este handler no se activa hasta que el estado del checkbox es actualizado. i.e. estaba con checked = false, hacés click, pasa a checked = true y ejecuta el handler.
+            event.target.checked ? aTask.markAsCompleted() : aTask.markAsUncompleted(); 
+        });
+        return checkbox;
+    }
+
+
+    createResumeTaskTitleElementFor(aTask){
+        const taskTitle = document.createElement('p');
+        taskTitle.setAttribute('id', DomRenderizer.tasksResumeTitleID);
+        taskTitle.textContent = aTask.getTitle();
+        return taskTitle;
+    }
+
+    createResumePriorityValueElementFor(aTask){
+        const priorityValue = document.createElement(DomRenderizer.taskResumePriorityValueElementsTag);
+        priorityValue.setAttribute('id', DomRenderizer.tasksResumePriorityValueID)
+        priorityValue.textContent = aTask.getPriority();
+        return priorityValue;
+    }
+
+    renderTaskResume(aTask, onClickHandler){
+        const resumeContainer = document.createElement(DomRenderizer.containersElementTag);
+        const checkbox = this.createTaskResumeCheckboxFor(aTask);
+        const taskTitle = this.createResumeTaskTitleElementFor(aTask);
+        const priorityValue = this.createResumePriorityValueElementFor(aTask);
+
+        resumeContainer.classList.add(DomRenderizer.tasksResumeClass);
+        resumeContainer.addEventListener('click', (event) => {
+            if (event.target != checkbox) onClickHandler(event, aTask);
+        });
+
+        this.appendChildsToElement(resumeContainer, [checkbox, taskTitle, priorityValue]);
+        return resumeContainer;
+    }
+
     renderConcreteTask(task, editionHandler, deleteHandler){
         const renderedTask = this.renderSingleTask(task);
         const editButton = this.createButtonForTask(task, DomRenderizer.editTaskButtonID, DomRenderizer.editTaskButtonTextContent, editionHandler);
@@ -243,15 +300,31 @@ class DomRenderizer {
         const mainTaskContainer = this.renderSingleTask(task);
         const dependentTaskContainer = document.createElement(DomRenderizer.containersElementTag);
         this.addClassToClassListOf(dependentTaskContainer, DomRenderizer.dependentTaskContainerClass);
-        this.appendChildsToElement(dependentTaskContainer, task.dependentsDo(task => this.renderTask(task)));
+        this.appendChildsToElement(dependentTaskContainer, task.dependentsDo(task => this.renderTaskResume(task)));
+        mainTaskContainer.appendChild(this.createTaskInfoNavBar());
         mainTaskContainer.appendChild(dependentTaskContainer);
         return mainTaskContainer;
+    }
+
+    createTaskInfoNavBar(){
+        const navBar = document.createElement('nav');
+        navBar.setAttribute('id', DomRenderizer.renderedTaskInfoNavBarID);
+        navBar.appendChild(this.createSubtasksNavBarButton());
+        return navBar;
+    }
+
+    createSubtasksNavBarButton(){
+        const subtasksButton = document.createElement('button');
+        subtasksButton.textContent = DomRenderizer.renderedTaskInfoNavBarSubtaskButtonTextContent;
+        subtasksButton.setAttribute('id', DomRenderizer.renderedTaskInfoNavBarSubtaskButtonID);
+        return subtasksButton;
     }
 
     createTaskDueDateElement(task){
         const dueDateElement      = document.createElement(DomRenderizer.elementsTagForTaskDueDate);
         dueDateElement.setAttribute("value", task.getDueDate());
         dueDateElement.setAttribute("type", "date");
+        dueDateElement.setAttribute("name", 'dueDate');
         this.addClassToClassListOf(dueDateElement, DomRenderizer.taskDueDateClass);
         return dueDateElement;
     }

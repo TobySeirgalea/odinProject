@@ -17,7 +17,6 @@ describe('Funcionalidad: Notas pueden tener título', () => {
     let note = new Note(noteTitles[0]); 
     expect(note.titleEquals(noteTitles[0])).toBeTruthy();
     });
-
   test('Se puede cambiar título de una nota ya creada', () => {
     let note = new Note(noteTitles[0]); 
     expect(note.titleEquals(noteTitles[0])).toBeTruthy();
@@ -51,6 +50,11 @@ describe('Funcionalidad: Notas pueden tener cuerpo', () => {
     expect(note.bodyEquals(note.getBody())).toBeTruthy();
     expect(note.getBody() === noteBodies[0]).toBeTruthy();
   });
-  
-
+});
+describe('Funcionalidad: Notas toman fecha actual por defecto', () => {
+  test('Puede crear nota con un título y cuerpo', () => {
+    let note = new Note(noteTitles[0], noteBodies[0]);
+    const date =  new Date().toISOString().split('T')[0];
+    expect(note.getDate()).toBe(date);
+  });
 });

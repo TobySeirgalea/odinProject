@@ -3,10 +3,12 @@ import defaultValues from "../../appConstantValues.json" with {type: 'json'};
 class Note{
     #title;
     #body;
+    #date;
     constructor(aTitle, aBody){
         this.assertNotEmptyTitleAndBody(aTitle, aBody);
         this.#title = aTitle;
         this.#body = aBody;
+        this.#date = new Date();
     }
 
     assertNotEmptyTitleAndBody(aTitle, aBody) {
@@ -38,7 +40,10 @@ class Note{
     getBody(){
         return String(this.#body);
     }
-    
+
+    getDate(){
+        return this.#date.toISOString().split('T')[0];
+    }
 }
 
 export {Note};
