@@ -629,7 +629,7 @@ describe('Restricción: No se permite tener en una compositeTask tareas con mism
         const concreteTask = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.minPriorityValue, taskTitles[2], taskDescriptions[1]);
         const anotherTask = Task.createConcreteTask(taskDueDates[2], defaultValues.taskPriorities.maxPriorityValue, 'a', taskDescriptions[0]);
         const oneMoreTask = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.maxPriorityValue, taskTitles[2])
-        const compositeTask = Task.createCompositeTask([anotherTask], taskDueDates[2], defaultValues.taskPriorities.maxPriorityValue, taskTitles[1], taskDescriptions[0]);
+        const compositeTask = Task.createCompositeTask([anotherTask], taskDueDates[2], defaultValues.taskPriorities.maxPriorityValue, taskTitles[1], taskDescriptions);
         expect(() => compositeTask.addTasks([concreteTask, oneMoreTask])).toThrow(defaultValues.errorMessages.cantAddTasksWithTheSameTitle);
     }); 
 });

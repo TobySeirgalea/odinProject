@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import {Task} from "../../domain/task.js";
+import {CompositeTask, ConcreteTask, Task} from "../../domain/task.js";
 import {Note} from "../../domain/notes.js";
 import "../domRenderizer.js";
 import { DomRenderizer } from "../domRenderizer.js";
@@ -144,31 +144,8 @@ describe('Funcionalidad: renderizar una tarea tiene clase de tareas y específic
     renderedTaskElementContainsClass(dom, task, DomRenderizer.compositeTaskClass);
     });
 });
-describe('Funcionalidad: renderizar una CompositeTask sin tareas dependientes elemento contenedor de estas', () => {
-  test('CompositeTask al ser renderizada contiene container para dependents', () => {
-    const dom = new DomRenderizer();
-    const task = Task.createCompositeTask([Task.createConcreteTask(addYears(new Date(), 100))] );
-    renderedTaskHasCorrectClassAndElementTag(dom, task, DomRenderizer.dependentTaskContainerClass, DomRenderizer.containersElementTag);
-    });
-  test('CompositeTask con una concreteTask dependiente al ser renderizada contiene container para dependents con esta renderizadas como resumes', () => {
-    const dom = new DomRenderizer();
-    const concreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
-    const compositeTask = Task.createCompositeTask([concreteTask], taskDueDates[1], defaultValues.taskPriorities.defaultCompositeTaskPriorityValue, taskTitles[1], taskDescriptions[1]);
-    const compositeTaskRendered = dom.renderTask(compositeTask);
-    const concreteTasksRenderedContainer  = compositeTaskRendered.querySelector("." + DomRenderizer.dependentTaskContainerClass).querySelector("."+ DomRenderizer.concreteTaskClass);
-    expect(compositeTaskRendered.querySelector("." + DomRenderizer.dependentTaskContainerClass)).toBeDefined();
-    
-    renderedTaskHasCorrectClassInfo(dom, compositeTask, DomRenderizer.taskTitleClass, taskTitles[1]);
-    renderedTaskHasCorrectClassInfo(dom, compositeTask, DomRenderizer.taskDescriptionsClass, taskDescriptions[1]);
-    renderedTaskHasCorrectDueDate(dom, compositeTask, taskDueDates[1]);
-    renderedTaskHasCorrectPriorityValue(dom, compositeTask, defaultValues.taskPriorities.defaultCompositeTaskPriorityValue);
-    assertTaskResumeContentIsCorrect(compositeTaskRendered.querySelector("." + DomRenderizer.dependentTaskContainerClass).children[0], concreteTask);
-    renderedTaskHasCorrectClassInfo(dom, concreteTask, DomRenderizer.taskTitleClass, taskTitles[0]);
-    renderedTaskHasCorrectClassInfo(dom, concreteTask, DomRenderizer.taskDescriptionsClass, taskDescriptions[0]);
-    renderedTaskHasCorrectDueDate(dom, concreteTask, taskDueDates[0]);
-    renderedTaskHasCorrectPriorityValue(dom, concreteTask, defaultValues.taskPriorities.defaultConcreteTaskPriorityValue);
-  });
-  test('CompositeTask con una concreteTask dependiente al ser renderizada contiene nav para botones', () => {
+describe('Funcionalidad: renderizar una tarea tiene un navbar con botón de subtasks', () => {
+  test('Renderizar composite task contiene navbar', () => {
     const dom = new DomRenderizer();
     const concreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
     const compositeTask = Task.createCompositeTask([concreteTask], taskDueDates[1], defaultValues.taskPriorities.defaultCompositeTaskPriorityValue, taskTitles[1], taskDescriptions[1]);
@@ -176,7 +153,7 @@ describe('Funcionalidad: renderizar una CompositeTask sin tareas dependientes el
     const navBar  = compositeTaskRendered.querySelector("#" + DomRenderizer.renderedTaskInfoNavBarID);
     expect(navBar).not.toBeNull();
     expect(navBar.tagName.toLowerCase()).toBe('nav');
-    });
+  });
   test('CompositeTask con una concreteTask dependiente al ser renderizada contiene nav para botones con botón de subtasks', () => {
     const dom = new DomRenderizer();
     const concreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
@@ -189,14 +166,232 @@ describe('Funcionalidad: renderizar una CompositeTask sin tareas dependientes el
     expect(subtasksButton.tagName.toLowerCase()).toBe('button');
     expect(subtasksButton.textContent).toBe(DomRenderizer.renderedTaskInfoNavBarSubtaskButtonTextContent);
   });
-  test('CompositeTask con una concreteTask dependiente al ser renderizada contiene nav para botones con botón de subtasks que on click muestras las dependents', () => {
+  test('concreteTask al ser renderizada contiene nav para botones con el de subtasks incluido', () => {
     let handlerExecuted = false;
     const dom = new DomRenderizer();
     const concreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
+    const concreteTaskRendered = dom.renderTask(concreteTask);
+    const navBar  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTaskInfoNavBarID);
+    expect(navBar).not.toBeNull();
+    expect(navBar.tagName.toLowerCase()).toBe('nav');
+    const subtasksButton = navBar.querySelector('#' + DomRenderizer.renderedTaskInfoNavBarSubtaskButtonID);
+    expect(subtasksButton).not.toBeNull();
+    expect(subtasksButton.getAttribute('id')).toBe(DomRenderizer.renderedTaskInfoNavBarSubtaskButtonID);
+    expect(subtasksButton.tagName.toLowerCase()).toBe('button');
+    expect(subtasksButton.textContent).toBe(DomRenderizer.renderedTaskInfoNavBarSubtaskButtonTextContent);
+  });
+});
+describe('Funcionalidad: Tareas tienen contenedor para ubicar contenido de los distintos botones del navbar', () => {  
+  test('concreteTask y compositeTask al ser renderizadas contienen taskComponentsContainer', () => {
+    const dom = new DomRenderizer();
+    const concreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
+    const concreteTaskRendered = dom.renderTask(concreteTask);
+    const anotherConcreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
+    const compositeTask = Task.createCompositeTask([anotherConcreteTask], taskDueDates[1], defaultValues.taskPriorities.defaultCompositeTaskPriorityValue, taskTitles[1], taskDescriptions[1]);
+    const compositeTaskRendered = dom.renderTask(compositeTask);
+
+    expect(concreteTaskRendered.querySelector('#' + DomRenderizer.renderedTasksComponentsContainerID)).toBeDefined();
+    expect(compositeTaskRendered.querySelector('#' + DomRenderizer.renderedTasksComponentsContainerID)).toBeDefined();
+    expect(concreteTaskRendered.querySelector('#' + DomRenderizer.renderedTasksComponentsContainerID).tagName.toLowerCase()).toBe(DomRenderizer.containersElementTag);
+    expect(compositeTaskRendered.querySelector('#' + DomRenderizer.renderedTasksComponentsContainerID).tagName.toLowerCase()).toBe(DomRenderizer.containersElementTag);
+  });
+});
+
+describe('Funcionalidad: Botón subtask de navbar de CompositeTask renderizada muestra a sus dependientes como task resumes', () => {
+  test('CompositeTask con una concreteTask dependiente al ser renderizada contiene nav para botones con botón de subtasks que al ser presionado pone dentro de tasksComponentsContainer a dependentsTaskContainer', () => {
+    const dom = new DomRenderizer();
+    const concreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
     const compositeTask = Task.createCompositeTask([concreteTask], taskDueDates[1], defaultValues.taskPriorities.defaultCompositeTaskPriorityValue, taskTitles[1], taskDescriptions[1]);
-    const compositeTaskRendered = dom.renderTask(compositeTask, () => handlerExecuted = true);
+    const compositeTaskRendered = dom.renderTask(compositeTask);
     const navBar  = compositeTaskRendered.querySelector("#" + DomRenderizer.renderedTaskInfoNavBarID);
     const subtasksButton = navBar.querySelector('#' + DomRenderizer.renderedTaskInfoNavBarSubtaskButtonID);
+    const taskComponentsContainer  = compositeTaskRendered.querySelector("#" + DomRenderizer.renderedTasksComponentsContainerID);
+    expect(compositeTaskRendered.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID)).toBeNull();
+    expect(taskComponentsContainer.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID)).toBeNull();
+    subtasksButton.click();
+    expect(taskComponentsContainer.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID)).toBeDefined();
+  });
+  test('CompositeTask con una concreteTask dependiente al ser renderizada contiene nav para botones con botón de subtasks que al ser presionado pone dentro de tasksComponentsContainer a dependentsTaskContainer con los task resumes de su dependiente', () => {
+    const dom = new DomRenderizer();
+    const concreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
+    const compositeTask = Task.createCompositeTask([concreteTask], taskDueDates[1], defaultValues.taskPriorities.defaultCompositeTaskPriorityValue, taskTitles[1], taskDescriptions[1]);
+    const compositeTaskRendered = dom.renderTask(compositeTask);
+    const navBar  = compositeTaskRendered.querySelector("#" + DomRenderizer.renderedTaskInfoNavBarID);
+    const subtasksButton = navBar.querySelector('#' + DomRenderizer.renderedTaskInfoNavBarSubtaskButtonID);
+    const taskComponentsContainer  = compositeTaskRendered.querySelector("#" + DomRenderizer.renderedTasksComponentsContainerID);
+    expect(compositeTaskRendered.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID)).toBeNull();
+    expect(taskComponentsContainer).not.toBeNull();
+    expect(taskComponentsContainer).not.toBeUndefined();
+    subtasksButton.click();
+    expect(compositeTask).toBeInstanceOf(CompositeTask);
+    const dependentsTaskContainer = taskComponentsContainer.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID);
+    expect(dependentsTaskContainer).not.toBeNull();
+    expect(dependentsTaskContainer).not.toBeUndefined();
+    assertTaskResumeContentIsCorrect(dependentsTaskContainer.children[0], concreteTask);
+    });
+});
+describe('Funcionalidad: Botón subtask de navbar de ConcreteTask renderizada muestra cartel de que no tiene dependientes y ofrece agregarlos con botón', () => {
+    test('Concrete task al ser renderizada contiene nav para botones con botón de subtasks que al ser presionado muestra mensaje de que no contiene subtareas y ofrece agregarlas', () => {
+      const dom = new DomRenderizer();
+      const concreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
+      const concreteTaskRendered = dom.renderTask(concreteTask);
+      const navBar  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTaskInfoNavBarID);
+      const subtasksButton = navBar.querySelector('#' + DomRenderizer.renderedTaskInfoNavBarSubtaskButtonID);
+      const taskComponentsContainer  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTasksComponentsContainerID);
+      expect(concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID)).toBeNull();
+      expect(taskComponentsContainer).not.toBeNull();
+      expect(taskComponentsContainer).not.toBeUndefined();
+      subtasksButton.click();
+      expect(concreteTask).toBeInstanceOf(ConcreteTask);
+      const dependentsTaskContainer = taskComponentsContainer.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID);
+      expect(dependentsTaskContainer).not.toBeNull();
+      expect(dependentsTaskContainer).not.toBeUndefined();
+      const dependentsTaskContainerOptions = dependentsTaskContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskID);
+      expect(dependentsTaskContainerOptions.tagName.toLowerCase()).toBe(DomRenderizer.containersElementTag);
+      expect(dependentsTaskContainerOptions).not.toBeUndefined();
+      expect(dependentsTaskContainerOptions).not.toBeNull();
+      const textContainer = dependentsTaskContainerOptions.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskTextContainerID);
+      const buttonToAddTasks = dependentsTaskContainerOptions.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksID);
+      expect(textContainer.tagName.toLowerCase()).toBe('p');
+      expect(buttonToAddTasks.tagName.toLowerCase()).toBe('button');
+      expect(textContainer.textContent).toBe(DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskTextContainerContent);
+      expect(buttonToAddTasks.textContent).toBe(DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonForAddTasksTextContent);
+  });
+  test('Concrete task al ser renderizada contiene nav para botones con botón de subtasks que al ser presionado muestra mensaje de que no contiene subtareas y ofrece agregarlas', () => {
+    const dom = new DomRenderizer();
+    const concreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
+    const concreteTaskRendered = dom.renderTask(concreteTask);
+    const navBar  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTaskInfoNavBarID);
+    const subtasksButton = navBar.querySelector('#' + DomRenderizer.renderedTaskInfoNavBarSubtaskButtonID);
+    const taskComponentsContainer  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTasksComponentsContainerID);
+    expect(concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID)).toBeNull();
+    expect(taskComponentsContainer).not.toBeNull();
+    expect(taskComponentsContainer).not.toBeUndefined();
+    subtasksButton.click();
+    expect(concreteTask).toBeInstanceOf(ConcreteTask);
+    const dependentsTaskContainer = taskComponentsContainer.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID);
+    expect(dependentsTaskContainer).not.toBeNull();
+    expect(dependentsTaskContainer).not.toBeUndefined();
+    const dependentsTaskContainerOptions = dependentsTaskContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskID);
+    expect(dependentsTaskContainerOptions.tagName.toLowerCase()).toBe(DomRenderizer.containersElementTag);
+    expect(dependentsTaskContainerOptions).not.toBeUndefined();
+    expect(dependentsTaskContainerOptions).not.toBeNull();
+    const textContainer = dependentsTaskContainerOptions.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskTextContainerID);
+    const buttonToAddTasks = dependentsTaskContainerOptions.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksID);
+    expect(textContainer.tagName.toLowerCase()).toBe('p');
+    expect(buttonToAddTasks.tagName.toLowerCase()).toBe('button');
+    expect(textContainer.textContent).toBe(DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskTextContainerContent);
+    expect(buttonToAddTasks.textContent).toBe(DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonForAddTasksTextContent);
+  });
+  test('Botón de addTask está dentro de un contenedor', () => {
+    const dom = new DomRenderizer();
+    const concreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
+    const concreteTaskRendered = dom.renderTask(concreteTask);
+    const navBar  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTaskInfoNavBarID);
+    const subtasksButton = navBar.querySelector('#' + DomRenderizer.renderedTaskInfoNavBarSubtaskButtonID);
+    const taskComponentsContainer  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTasksComponentsContainerID);
+    subtasksButton.click();
+    const dependentsTaskContainer = taskComponentsContainer.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID);
+    const dependentsTaskContainerOptions = dependentsTaskContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskID);
+    const buttonToAddTasksContainer = dependentsTaskContainerOptions.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonForAddTasksContainerID);
+    expect(buttonToAddTasksContainer).toBeDefined();
+    expect(buttonToAddTasksContainer).not.toBeNull();
+    const buttonToAddTasks = buttonToAddTasksContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksID);
+    expect(buttonToAddTasks).toBeDefined();
+    expect(buttonToAddTasks).not.toBeNull();
+  });
+  test('Botón de addTask al ser presionado agrega ul con otros dos botones dentro', () => {
+    const dom = new DomRenderizer();
+    const concreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
+    const concreteTaskRendered = dom.renderTask(concreteTask);
+    const navBar  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTaskInfoNavBarID);
+    const subtasksButton = navBar.querySelector('#' + DomRenderizer.renderedTaskInfoNavBarSubtaskButtonID);
+    const taskComponentsContainer  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTasksComponentsContainerID);
+    subtasksButton.click();
+    const dependentsTaskContainer = taskComponentsContainer.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID);
+    const dependentsTaskContainerOptions = dependentsTaskContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskID);
+    const buttonToAddTasksContainer = dependentsTaskContainerOptions.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonForAddTasksContainerID);
+    const buttonToAddTasks = buttonToAddTasksContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksID);
+    buttonToAddTasks.click();
+    const listContainer = buttonToAddTasksContainer.querySelector('.' + DomRenderizer.dropdownMenuClass);
+    expect(listContainer).toBeDefined();
+    expect(listContainer).not.toBeNull();
+    const listContainerItems = listContainer.querySelectorAll('li');
+    const addExistingTaskButton = listContainerItems[0];
+    expect(addExistingTaskButton).toBeDefined();
+    expect(addExistingTaskButton).not.toBeNull();
+    const createNewTaskButton = listContainerItems[1];
+    expect(createNewTaskButton).toBeDefined();
+    expect(createNewTaskButton).not.toBeNull();
+    expect(listContainer.classList.contains(DomRenderizer.dropdownMenuClass)).toBeTruthy();
+    expect(listContainer.tagName.toLowerCase()).toBe('ul');
+    expect(listContainerItems[0].tagName.toLowerCase()).toBe('li');
+    expect(listContainerItems[1].tagName.toLowerCase()).toBe('li');
+    expect(listContainerItems[0].children[0].tagName.toLowerCase()).toBe('button');
+    expect(listContainerItems[1].children[0].tagName.toLowerCase()).toBe('button');
+
+    expect(listContainerItems[0].children[0].textContent).toBe(DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonForAddExistingTasksButtonTextContent);
+    expect(listContainerItems[1].children[0].textContent).toBe(DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonForCreateNewTasksButtonTextContent);
+
+    expect(listContainerItems[0].children[0].getAttribute('id')).toBe(DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksAddExistingTaskButtonID);
+    expect(listContainerItems[1].children[0].getAttribute('id')).toBe(DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksCreateNewTaskButtonID);
+  });
+  test('Botón de addTask al sacarle el mouse de su contenedor del addTaskButton se borra', () => {
+    const dom = new DomRenderizer();
+    const concreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
+    const concreteTaskRendered = dom.renderTask(concreteTask);
+    const navBar  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTaskInfoNavBarID);
+    const subtasksButton = navBar.querySelector('#' + DomRenderizer.renderedTaskInfoNavBarSubtaskButtonID);
+    const taskComponentsContainer  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTasksComponentsContainerID);
+    subtasksButton.click();
+    const dependentsTaskContainer = taskComponentsContainer.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID);
+    const dependentsTaskContainerOptions = dependentsTaskContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskID);
+    const buttonToAddTasksContainer = dependentsTaskContainerOptions.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonForAddTasksContainerID);
+    const buttonToAddTasks = buttonToAddTasksContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksID);
+    buttonToAddTasks.click();
+    let listContainer = buttonToAddTasksContainer.querySelector('.' + DomRenderizer.dropdownMenuClass);
+    expect(listContainer).toBeDefined();
+    expect(listContainer).not.toBeNull();
+    const buttonToAddTasksContainerPosition = buttonToAddTasksContainer.getBoundingClientRect();
+    buttonToAddTasksContainer.dispatchEvent(new MouseEvent('mouseover', {clientX: buttonToAddTasksContainerPosition.left+1, clientY: buttonToAddTasksContainerPosition.top + 1}));
+    listContainer = buttonToAddTasksContainer.querySelector('.' + DomRenderizer.dropdownMenuClass);
+    expect(listContainer).toBeDefined();
+    expect(listContainer).not.toBeNull();
+  });
+    test('Botón de addNewTask al hacerle click muestra formulario de creación de tareas', () => {
+    const dom = new DomRenderizer();
+    const concreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
+    const concreteTaskRendered = dom.renderTask(concreteTask);
+    const navBar  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTaskInfoNavBarID);
+    const subtasksButton = navBar.querySelector('#' + DomRenderizer.renderedTaskInfoNavBarSubtaskButtonID);
+    const taskComponentsContainer  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTasksComponentsContainerID);
+    subtasksButton.click();
+    const dependentsTaskContainer = taskComponentsContainer.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID);
+    const dependentsTaskContainerOptions = dependentsTaskContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskID);
+    const buttonToAddTasksContainer = dependentsTaskContainerOptions.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonForAddTasksContainerID);
+    const buttonToAddTasks = buttonToAddTasksContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksID);
+    buttonToAddTasks.click();
+    const listContainer = buttonToAddTasksContainer.querySelector('.' + DomRenderizer.dropdownMenuClass);
+    expect(listContainer).toBeDefined();
+    expect(listContainer).not.toBeNull();
+    const listContainerItems = listContainer.querySelectorAll('li');
+    const createNewTaskButton = listContainerItems[1].children[0];
+    expect(document.body.querySelector('#' + DomRenderizer.formFieldsContainerID)).toBeNull();
+    expect(document.body.querySelector('#' + DomRenderizer.createFormDialogID)).toBeNull();
+    createNewTaskButton.click();
+    const taskCreationDialog = document.body.querySelector('#' + DomRenderizer.createFormDialogID);
+    const taskCreationForm = taskCreationDialog.querySelector('#' + DomRenderizer.formFieldsContainerID);
+    expect(taskCreationForm).not.toBeNull();
+    expect(taskCreationDialog).not.toBeNull();
+    expect(taskCreationDialog).toBeDefined();
+    expect(taskCreationForm).toBeDefined();
+    assertTaskCreationFormHasAllNeededFields(taskCreationForm);
+    const cancelButton = taskCreationDialog.querySelector('#' + cancelCreationFormButtonID);
+    const submitButton = taskCreationDialog.querySelector('#' + DomRenderizer.creationFormSubmitButtonID);
+    expect(submitButton).toBeDefined();
+    expect(submitButton).not.toBeNull();
+    expect(cancelButton).toBeDefined();
+    expect(cancelButton).not.toBeNull();
   });
 });
 
@@ -210,14 +405,14 @@ describe('Funcionalidad: Tasks tienen botón de edición', () => {
     expect(taskEditButton.tagName.toLowerCase()).toBe('button');
     expect(taskEditButton.textContent).toBe(DomRenderizer.editTaskButtonTextContent);
   });
-test('ConcreteTask tiene botón de edición y ejecuta handler al clickearlo', () => {
-    let handlerExecuted  = false;
-    const dom            = new DomRenderizer();
-    const task           = Task.createConcreteTask();
-    const renderedTask   = dom.renderTask(task, () => handlerExecuted = true);
+  test('CompositeTask tiene botón de edición', () => {
+    const dom          = new DomRenderizer();
+    const task         = Task.createCompositeTask([Task.createConcreteTask(addDays(new Date(), 4), defaultValues.taskPriorities.maxPriorityValue, 'a')]);
+    const renderedTask = dom.renderTask(task);
     const taskEditButton = renderedTask.querySelector('#' + DomRenderizer.editTaskButtonID);
-    taskEditButton.click();
-    expect(handlerExecuted).toBeTruthy();
+    expect(taskEditButton).not.toBeNull();
+    expect(taskEditButton.tagName.toLowerCase()).toBe('button');
+    expect(taskEditButton.textContent).toBe(DomRenderizer.editTaskButtonTextContent);
   });
 });
 describe('Funcionalidad: Tasks tienen botón de borrado', () => {
@@ -230,14 +425,14 @@ describe('Funcionalidad: Tasks tienen botón de borrado', () => {
     expect(taskDeleteButton.tagName.toLowerCase()).toBe('button');
     expect(taskDeleteButton.textContent).toBe(DomRenderizer.deleteTaskButtonTextContent);
   });
-  test('ConcreteTask tiene botón de borrado y ejecuta handler al clickearlo', () => {
-    let handlerExecuted  = false;
-    const dom            = new DomRenderizer();
-    const task           = Task.createConcreteTask();
-    const renderedTask   = dom.renderTask(task, () => true, () => handlerExecuted = true);
+  test('CompositeTask tiene botón de borrado', () => {
+    const dom          = new DomRenderizer();
+    const task         = Task.createCompositeTask([Task.createConcreteTask(addDays(new Date(), 4), defaultValues.taskPriorities.maxPriorityValue, 'a')]);
+    const renderedTask = dom.renderTask(task);
     const taskDeleteButton = renderedTask.querySelector('#' + DomRenderizer.deleteTaskButtonID);
-    taskDeleteButton.click();
-    expect(handlerExecuted).toBeTruthy();
+    expect(taskDeleteButton).not.toBeNull();
+    expect(taskDeleteButton.tagName.toLowerCase()).toBe('button');
+    expect(taskDeleteButton.textContent).toBe(DomRenderizer.deleteTaskButtonTextContent);
   });
 });
 describe('Funcionalidad: renderizar una nota contiene su título', () => {
@@ -330,109 +525,124 @@ describe('Funcionalidad: Formulario de creación de contenido', () => {
   });
   test('dialog contains forms container after task option is selected', () => {
     const dom  = new DomRenderizer();
-    let returnedForm; 
-    const form = dom.createContentForm(() => returnedForm = dom.renderTaskCreationForm(), () => true);
+    const form = dom.createContentForm();
+    let taskCreationForm = form.querySelector('#' + DomRenderizer.formFieldsContainerID);
     const createTaskButton = form.querySelector('#' + DomRenderizer.taskOptionInCreateFormID);
-    expect(returnedForm).toBeUndefined();
+    expect(taskCreationForm).toBeNull();
     createTaskButton.click();
-    expect(returnedForm).toBeDefined();
-    expect(returnedForm.tagName.toLowerCase() === 'form').toBeTruthy();
+    taskCreationForm = form.querySelector('#' + DomRenderizer.formFieldsContainerID);
+    expect(taskCreationForm).not.toBeNull();
+    expect(taskCreationForm).toBeDefined();
+    expect(taskCreationForm).not.toBeNull();
+    expect(taskCreationForm.tagName.toLowerCase() === 'form').toBeTruthy();
   });
   test('dialog contains forms container after note option is selected', () => {
     const dom  = new DomRenderizer();
-    let returnedForm;
-    const form = dom.createContentForm(() => true, () => returnedForm = dom.renderNoteCreationForm());
+    const form = dom.createContentForm();
+    let noteCreationForm = form.querySelector('#' + DomRenderizer.formFieldsContainerID);
+    expect(noteCreationForm).toBeNull();
     const createNoteButton = form.querySelector('#' + DomRenderizer.noteOptionInCreateFormID);
-    expect(returnedForm).toBeUndefined();
+    expect(noteCreationForm).toBeNull();
     createNoteButton.click();
-    expect(returnedForm).toBeDefined();
-    expect(returnedForm.tagName.toLowerCase() === 'form').toBeTruthy();
+    noteCreationForm = form.querySelector('#' + DomRenderizer.formFieldsContainerID);
+    expect(noteCreationForm).toBeDefined();
+    expect(noteCreationForm).not.toBeNull();
+    expect(noteCreationForm.tagName.toLowerCase() === 'form').toBeTruthy();
   });
   test('forms container after create task button is pressed contains all needed fields', () => {
     const dom  = new DomRenderizer();
-    let taskForm;
-    const form = dom.createContentForm(() =>  taskForm = dom.renderTaskCreationForm(), () => true);
+    const form = dom.createContentForm();
     const createTaskButton = form.querySelector('#' + DomRenderizer.taskOptionInCreateFormID);
-    expect(taskForm).toBeUndefined();
+    let taskForm = form.querySelector('#' + DomRenderizer.formFieldsContainerID);
+    expect(taskForm).toBeNull();
     createTaskButton.click();
+    taskForm = form.querySelector('#' + DomRenderizer.formFieldsContainerID);
     expect(taskForm).toBeDefined();
+    expect(taskForm).not.toBeNull();
     assertTaskCreationFormHasAllNeededFields(taskForm);
     assertContainerHasElement(taskForm, "button", DomRenderizer.creationFormSubmitButtonID);
   });
     test('forms container after create note button is pressed contains all needed fields', () => {
     const dom  = new DomRenderizer();
-    let noteForm;
-    const form = dom.createContentForm(() => true, () => noteForm = dom.renderNoteCreationForm());
+    const form = dom.createContentForm();
     const createNoteButton = form.querySelector('#' + DomRenderizer.noteOptionInCreateFormID);
-    expect(noteForm).toBeUndefined();
+    let noteForm = form.querySelector('#' + DomRenderizer.formFieldsContainerID);
+    expect(noteForm).toBeNull();
     createNoteButton.click();
+    noteForm = form.querySelector('#' + DomRenderizer.formFieldsContainerID);
     expect(noteForm).toBeDefined();
+    expect(noteForm).not.toBeNull();
     assertNoteCreationFormHasAllNeededFields(noteForm);
     assertContainerHasElement(noteForm, 'button', DomRenderizer.creationFormSubmitButtonID);
   });
   test('Can change from note to task and the form fields also change', () => {
     const dom  = new DomRenderizer();
-    let noteForm;
-    let taskForm;
-    const form = dom.createContentForm(() => taskForm = dom.renderTaskCreationForm(), () => noteForm = dom.renderNoteCreationForm());
+    const form = dom.createContentForm();
+    let noteForm = form.querySelector('#' + DomRenderizer.formFieldsContainerID);
     const createNoteButton = form.querySelector('#' + DomRenderizer.noteOptionInCreateFormID);
     const createTaskButton = form.querySelector('#' + DomRenderizer.taskOptionInCreateFormID);
-    expect(noteForm).toBeUndefined();
+    expect(noteForm).toBeNull();
     createNoteButton.click();
-    expect(noteForm).toBeDefined(); 
+    noteForm = form.querySelector('#' + DomRenderizer.formFieldsContainerID);
+    expect(noteForm).toBeDefined();
+    expect(noteForm).not.toBeNull();
     assertNoteCreationFormHasAllNeededFields(noteForm);
-    expect(taskForm).toBeUndefined();
     createTaskButton.click();
+    let taskForm = form.querySelector('#' + DomRenderizer.formFieldsContainerID);
     expect(taskForm).toBeDefined();
+    expect(taskForm).not.toBeNull();
     assertTaskCreationFormHasAllNeededFields(taskForm);
   });
   test('Can change from task to note and the form fields also change', () => {
     const dom  = new DomRenderizer();
-    let noteForm;
-    let taskForm;
-    const form = dom.createContentForm(() => taskForm = dom.renderTaskCreationForm(), () => noteForm = dom.renderNoteCreationForm());
+    const form = dom.createContentForm();
+    let taskForm = form.querySelector('#' + DomRenderizer.formFieldsContainerID);
     const createNoteButton = form.querySelector('#' + DomRenderizer.noteOptionInCreateFormID);
     const createTaskButton = form.querySelector('#' + DomRenderizer.taskOptionInCreateFormID);
-    expect(taskForm).toBeUndefined();
+    expect(taskForm).toBeNull();
     createTaskButton.click();
+    taskForm = form.querySelector('#' + DomRenderizer.formFieldsContainerID);
     expect(taskForm).toBeDefined();
+    expect(taskForm).not.toBeNull();
     assertTaskCreationFormHasAllNeededFields(taskForm);
-    expect(noteForm).toBeUndefined();
     createNoteButton.click();
+    let noteForm = form.querySelector('#' + DomRenderizer.formFieldsContainerID);
     expect(noteForm).toBeDefined(); 
+    expect(noteForm).not.toBeNull();
     assertNoteCreationFormHasAllNeededFields(noteForm);
   });
   test('submit button doesnt appears until tasks options or notes is selected', () => {
     const dom  = new DomRenderizer();
-    let noteForm;
-    const form = dom.createContentForm(() => true, () => noteForm = dom.renderNoteCreationForm());
+    const form = dom.createContentForm();
+    let noteForm = form.querySelector('#' + DomRenderizer.formFieldsContainerID);
     const createNoteButton = form.querySelector('#' + DomRenderizer.noteOptionInCreateFormID);
     const createTaskButton = form.querySelector('#' + DomRenderizer.taskOptionInCreateFormID);
     expect(form.querySelector("#" + DomRenderizer.creationFormSubmitButtonID)).toBeNull();
-    expect(noteForm).toBeUndefined();
+    expect(noteForm).toBeNull();
     createNoteButton.click();
+    noteForm = form.querySelector('#' + DomRenderizer.formFieldsContainerID);
     expect(noteForm).toBeDefined(); 
+    expect(noteForm).not.toBeNull();
     expect(form.querySelector("#" + DomRenderizer.creationFormSubmitButtonID)).toBeDefined();
   });
   test('submit button close dialog when is pressed', () => {
-    const dom  = new DomRenderizer();
-    let noteForm;
-    let taskForm;
-    const form = dom.createContentForm(() => taskForm = dom.renderTaskCreationForm(() => form.remove()), () => noteForm = dom.renderNoteCreationForm());
+    const appController = {createTaskByFormInfo: (userData) => userData};
+    const dom  = new DomRenderizer(appController);
+    const form = dom.createContentForm();
     const createNoteButton = form.querySelector('#' + DomRenderizer.noteOptionInCreateFormID);
     const createTaskButton = form.querySelector('#' + DomRenderizer.taskOptionInCreateFormID);
     createTaskButton.click();
+    let taskForm = form.querySelector('#' + DomRenderizer.formFieldsContainerID);
     const submitButton = taskForm.querySelector("#" + DomRenderizer.creationFormSubmitButtonID); 
     expect(submitButton).toBeDefined();
+    expect(submitButton).not.toBeNull();
     fillTaskForm(taskForm);
     submitButton.click();
     expect(!form.open).toBeTruthy();
   });
   test('cancel button close dialog when is pressed', () => {
     const dom  = new DomRenderizer();
-    let noteForm;
-    let taskForm;
-    const form = dom.createContentForm(() => taskForm = dom.renderTaskCreationForm(), () => noteForm = dom.renderNoteCreationForm());
+    const form = dom.createContentForm();
     const createNoteButton = form.querySelector('#' + DomRenderizer.noteOptionInCreateFormID);
     const createTaskButton = form.querySelector('#' + DomRenderizer.taskOptionInCreateFormID);
     const cancelButton     = form.querySelector('#' + DomRenderizer.cancelCreationFormButtonID);
@@ -442,32 +652,34 @@ describe('Funcionalidad: Formulario de creación de contenido', () => {
   });
   test('when notes is selected, submitButton contains correct text', () => {
     const dom  = new DomRenderizer();
-    let noteForm;
-    const form = dom.createContentForm(() => true, () => noteForm = dom.renderNoteCreationForm());
+    const form = dom.createContentForm();
     const createNoteButton = form.querySelector('#' + DomRenderizer.noteOptionInCreateFormID);
     createNoteButton.click();
+    let noteForm = form.querySelector('#' + DomRenderizer.formFieldsContainerID);
     const submitButton = noteForm.querySelector("#" + DomRenderizer.creationFormSubmitButtonID); 
     expect(submitButton).toBeDefined();
+    expect(submitButton).not.toBeNull();
     expect(submitButton.textContent === DomRenderizer.createNoteButtonText).toBeTruthy();
     expect(submitButton.getAttribute('type') === 'submit').toBeTruthy();
   });
   test('when notes is selected form contains just one submitButton', () => {
     const dom  = new DomRenderizer();
-    let noteForm;
-    const form = dom.createContentForm(() => true, () => noteForm = dom.renderNoteCreationForm());
+    const form = dom.createContentForm();
     const createNoteButton = form.querySelector('#' + DomRenderizer.noteOptionInCreateFormID);
     createNoteButton.click();
+    let noteForm = form.querySelector('#' + DomRenderizer.formFieldsContainerID);
     const submitButton = noteForm.querySelector("#" + DomRenderizer.creationFormSubmitButtonID); 
     expect(submitButton).toBeDefined();
+    expect(submitButton).not.toBeNull();
     createNoteButton.click();
     expect(noteForm.querySelectorAll("#" + DomRenderizer.creationFormSubmitButtonID).length === 1).toBeTruthy();
   });
   test('when tasks is selected, submitButton contains correct text', () => {
     const dom  = new DomRenderizer();
-    let taskForm;
-    const form = dom.createContentForm(() => taskForm = dom.renderTaskCreationForm(), () => true);
+    const form = dom.createContentForm();
     const createTaskButton = form.querySelector('#' + DomRenderizer.taskOptionInCreateFormID);
     createTaskButton.click();
+    let taskForm = form.querySelector('#' + DomRenderizer.formFieldsContainerID);
     const submitButton = taskForm.querySelector("#" + DomRenderizer.creationFormSubmitButtonID); 
     expect(submitButton).toBeDefined();
     expect(submitButton.textContent === DomRenderizer.createTaskButtonText).toBeTruthy();
@@ -475,55 +687,26 @@ describe('Funcionalidad: Formulario de creación de contenido', () => {
   });
  test('when notes is selected form contains just one submitButton', () => {
     const dom  = new DomRenderizer();
-    let notesForm;
-    const form = dom.createContentForm(() => true, () => notesForm = dom.renderTaskCreationForm());
+    const form = dom.createContentForm();
     const createNoteButton = form.querySelector('#' + DomRenderizer.noteOptionInCreateFormID);
     createNoteButton.click();
+    let notesForm = form.querySelector('#' + DomRenderizer.formFieldsContainerID);
     const submitButton = notesForm.querySelector("#" + DomRenderizer.creationFormSubmitButtonID); 
     expect(submitButton).toBeDefined();
+    expect(submitButton).not.toBeNull();
     createNoteButton.click();
     expect(notesForm.querySelectorAll("#" + DomRenderizer.creationFormSubmitButtonID).length === 1).toBeTruthy();
   });
-  test('after filling a task and pressing submit button handler is executed', () => {
-    const dom  = new DomRenderizer();
-    let taskForm;
-    let handlerExecuted = false;
-    const form = dom.createContentForm(() => taskForm = dom.renderTaskCreationForm((event, form) => handlerExecuted = true), () => true);
-    const createTaskButton = form.querySelector('#' + DomRenderizer.taskOptionInCreateFormID);
-    createTaskButton.click();
-    fillTaskForm(taskForm);
-    const submitButton = taskForm.querySelector('#' + DomRenderizer.creationFormSubmitButtonID);
-    submitButton.click();
-    expect(handlerExecuted).toBeTruthy();
-  });
-  test('after filling a note and pressing submit button handler is executed', () => {
-    const dom  = new DomRenderizer();
-    let notesForm;
-    let handlerExecuted = false;
-    const form = dom.createContentForm(() => true, () => notesForm = dom.renderNoteCreationForm((event, form) => handlerExecuted = true));
-    const createNoteButton = form.querySelector('#' + DomRenderizer.noteOptionInCreateFormID);
-    createNoteButton.click();
-    fillNoteForm(notesForm);
-    const submitButton = notesForm.querySelector('#' + DomRenderizer.creationFormSubmitButtonID);
-    submitButton.click();
-    expect(handlerExecuted).toBeTruthy();
-  });
-  test('rendered create button executes handler', () => {
-    const dom = new DomRenderizer();
-    let executed = false;
-    const createButton = dom.renderCreateButton(() => executed = true);
-    createButton.click();
-    expect(executed).toBeTruthy();
-  });
   test('can collect info from note form using appropiated handlers', () => {
-    const dom = new DomRenderizer();
     let noteInfo;
-    let noteForm;
-    let dialog;
-    const createButton = dom.renderCreateButton(() => dialog = dom.createContentForm(() => true, () => noteForm = dom.renderNoteCreationForm(() => noteInfo = dom.collectUserInputOfNoteForm(noteForm))));
+    const appController = {createNoteByFormInfo: (userData) => noteInfo = userData};
+    const dom = new DomRenderizer(appController);
+    const createButton = dom.renderCreateButton();
     createButton.click();
+    const dialog = document.body.querySelector('#' + DomRenderizer.createFormDialogID);
     const createNoteButton = dialog.querySelector('#' + DomRenderizer.noteOptionInCreateFormID);
     createNoteButton.click();
+    const noteForm = dialog.querySelector('#' + DomRenderizer.formFieldsContainerID);
     fillNoteForm(noteForm);
     const submitButton = noteForm.querySelector('#' + DomRenderizer.creationFormSubmitButtonID);
     submitButton.click();
@@ -531,14 +714,15 @@ describe('Funcionalidad: Formulario de creación de contenido', () => {
     expect(noteInfo.body).toBe('noteBody');
   });
   test('can collect info from task form using appropiated handlers', () => {
-    const dom = new DomRenderizer();
     let taskInfo;
-    let taskForm;
-    let dialog;
-    const createButton = dom.renderCreateButton(() => dialog = dom.createContentForm(() => taskForm = dom.renderTaskCreationForm(() => taskInfo = dom.collectUserInputOfTaskForm(taskForm)), () => true));
+    const appController = {createTaskByFormInfo: (userData) => taskInfo = userData};
+    const dom = new DomRenderizer(appController);
+    const createButton = dom.renderCreateButton();
     createButton.click();
+    const dialog = document.body.querySelector('#' + DomRenderizer.createFormDialogID);
     const createTaskButton = dialog.querySelector('#' + DomRenderizer.taskOptionInCreateFormID);
     createTaskButton.click();
+    const taskForm = dialog.querySelector('#' + DomRenderizer.formFieldsContainerID);
     fillTaskForm(taskForm);
     const submitButton = taskForm.querySelector('#' + DomRenderizer.creationFormSubmitButtonID);
     submitButton.click();
@@ -653,6 +837,15 @@ describe('Funcionalidad: Task resumes', () => {
     taskResume.click();
     expect(handlerExecuted).toBeTruthy();
   });
+});
+
+afterEach(() => {
+    document.body.innerHTML = '';
+});
+
+beforeAll(() => {
+  HTMLDialogElement.prototype.showModal = jest.fn();
+  HTMLDialogElement.prototype.close = jest.fn();
 });
 
 function assertTaskResumeContentIsCorrect(aTaskResume, aTask){

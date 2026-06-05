@@ -189,6 +189,9 @@ class ConcreteTask extends Task{
         return aDomRenderizer.renderConcreteTask(this, anEditionHandler, aDeleteHandler);
     }
 
+    subNavBarButtonHandlerWith(aDomRenderizer, taskContainer){
+        return aDomRenderizer.subNavBarButtonHandlerForConcreteTask(this, taskContainer);
+    }
 }
 
 class CompositeTask extends Task{
@@ -296,6 +299,10 @@ class CompositeTask extends Task{
 
     renderWith(aDomRenderizer){
         return aDomRenderizer.renderCompositeTask(this);
+    }
+
+    subNavBarButtonHandlerWith(aDomRenderizer, taskContainer){
+        return aDomRenderizer.subNavBarButtonHandlerForCompositeTask(this, taskContainer);
     }
 }
 

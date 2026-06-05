@@ -9,6 +9,7 @@ const task = Task.createConcreteTask(addDays(new Date(), 4), 0, 'Titulo', 'descr
 const compositeTask = Task.createCompositeTask([task], addDays(new Date(), 5), 0, 'Composite', 'ACompositeTask');
 const doubleCompositeTask = Task.createCompositeTask([compositeTask], addDays(new Date(), 5), 0, 'Double composite', 'a double');
 document.body.appendChild(dom.renderTask(doubleCompositeTask));
+document.body.appendChild(dom.renderTask(task));
 
 
 const app = new AppController();
