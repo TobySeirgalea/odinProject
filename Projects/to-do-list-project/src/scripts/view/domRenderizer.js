@@ -78,6 +78,13 @@ class DomRenderizer {
     static dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksCreateNewTaskButtonID = 'dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksCreateNewTaskButton';
     static dropdownMenuClass = 'dropdownMenuClass';
     static createFormDialogID = 'createFormDialog';
+    static searchingTaskDialogID = 'searchingTaskDialog';
+    static taskSearchingDialogMainContentContainerID = 'taskSearchingDialogMainContentContainer';
+    static searchingListItemID = 'searchingListItem';
+    static searchingListItemTitleElement = 'h3';
+    static searchingListItemDescriptionElement = 'p';
+    static searchingListItemDueDateElement = 'input';
+    static searchingDialogSubmitButtonID = 'searchingDialogSubmitButton';
 
     #appController;
     constructor(anAppController){
@@ -113,8 +120,8 @@ class DomRenderizer {
         noteFormButton.textContent = 'Note';
         cancelButton.textContent   = 'Cancel';
 
-        taskFormButton.addEventListener("click", (event) => this.appendFormToContentCreationDialog(formDialog, this.renderTaskCreationForm()));
-        noteFormButton.addEventListener("click", (event) => this.appendFormToContentCreationDialog(formDialog, this.renderNoteCreationForm()));
+        taskFormButton.addEventListener("click", (event) => this.appendFormToContentCreationDialog(formDialog, this.renderTaskCreationForm(formDialog)));
+        noteFormButton.addEventListener("click", (event) => this.appendFormToContentCreationDialog(formDialog, this.renderNoteCreationForm(formDialog)));
         cancelButton.addEventListener("click",   (event) => formDialog.remove());
 
         this.appendChildsToElement(formDialog, [taskFormButton, noteFormButton, cancelButton]);
@@ -139,7 +146,7 @@ class DomRenderizer {
         return (this.#appController).createTaskByFormInfo(userData);
     }
 
-    renderNoteCreationForm(){
+    renderNoteCreationForm(dialog){
         const noteFormContainer = document.createElement('form');
         noteFormContainer.setAttribute('method', 'dialog');
         noteFormContainer.setAttribute('id', DomRenderizer.formFieldsContainerID);
@@ -156,6 +163,7 @@ class DomRenderizer {
         submitButton.setAttribute('id', DomRenderizer.creationFormSubmitButtonID);
         submitButton.setAttribute('type', 'submit');
         submitButton.textContent = message;
+        submitButton.setAttribute('form', DomRenderizer.formFieldsContainerID);
         return submitButton;
     }
 
@@ -165,9 +173,9 @@ class DomRenderizer {
         return button;
     }
 
-    createSubmitButtonForTask(form){
+    createSubmitButtonForTask(form, dialog){
         const button = this.createSubmitButtonWithMessage(DomRenderizer.createTaskButtonText);
-        button.addEventListener("click", (event) => this.submitTaskButtonHandler(event, form));
+        button.addEventListener("click", (event) => this.submitTaskButtonHandler(event, form, dialog));
         return button;
     }
 
@@ -215,7 +223,7 @@ class DomRenderizer {
         return fieldContainer;
     }
 
-    renderTaskCreationForm(){
+    renderTaskCreationForm(dialog){
         const taskFormContainer = document.createElement('form');
         taskFormContainer.setAttribute("id", DomRenderizer.formFieldsContainerID);
         taskFormContainer.setAttribute('method', 'dialog');
@@ -228,7 +236,7 @@ class DomRenderizer {
         const selectElement = taskFormContainer.querySelector("#" + DomRenderizer.taskFormPriorityValueSelectInputID);
         this.appendChildsToElement(selectElement, this.generateOptionsForPriorityValues());
         
-        taskFormContainer.appendChild(this.createSubmitButtonForTask(taskFormContainer));
+        taskFormContainer.appendChild(this.createSubmitButtonForTask(taskFormContainer, dialog));
         return taskFormContainer;
     }
 
@@ -368,12 +376,59 @@ class DomRenderizer {
         return subtasksButton;
     }
 
-    addExistingTaskHandler(event, task){
-
+    createSearchingListItemFor(task, container){
+        const titleElement = this.createTitleElement(task, DomRenderizer.elementsTagForTaskTitles);
+        const descriptionElement = this.createDescriptionElement(task);
+        const dueDateElement = this.createTaskDueDateElement(task);
+        const priorityValueElement = this.createTaskPriorityElement(task);
+        this.appendChildsToElement(container, [titleElement, descriptionElement, dueDateElement, priorityValueElement]);
     }
+
+    addExistingTaskHandler(event, task){
+        const selectedToAddTask = [];
+        const searchTasksDialog = document.createElement('dialog');
+        const mainContentContainer = document.createElement(DomRenderizer.containersElementTag);
+        const listOfTaskToAdd = document.createElement('ul');
+        const validExistingTaskToAdd = this.#appController.getAllTasks(task);
+        validExistingTaskToAdd.forEach(validTaskToAdd => {
+            const listItem = document.createElement('li');
+            listItem.setAttribute('id', DomRenderizer.searchingListItemID);
+            this.createSearchingListItemFor(validTaskToAdd, listItem);
+            listItem.addEventListener('click', (event) => {
+                selectedToAddTask.push(validTaskToAdd);
+            });
+            listOfTaskToAdd.appendChild(listItem);
+        });
+
+
+        searchTasksDialog.setAttribute('id', DomRenderizer.searchingTaskDialogID);
+        mainContentContainer.setAttribute('id', DomRenderizer.taskSearchingDialogMainContentContainerID);
+
+        const submitButton = this.createButton(DomRenderizer.searchingDialogSubmitButtonID, DomRenderizer.searchingDialogSubmitButtonTextContent, (event) => {
+            this.#appController.addSubtasksTo(selectedToAddTask, task);
+            searchTasksDialog.close();
+        });
+        const cancelButton = this.createButton(DomRenderizer.searchingDialogCancelButtonID, DomRenderizer.searchingDialogCancelButtonTextContent, () => true);
+        this.appendChildsToElement(mainContentContainer, [listOfTaskToAdd, submitButton, cancelButton]);
+        searchTasksDialog.appendChild(mainContentContainer);
+        document.body.appendChild(searchTasksDialog);
+        searchTasksDialog.showModal();
+    }
+
+    static searchingDialogCancelButtonID = 'searchingDialogCancelButton';
+    static searchingDialogSubmitButtonTextContent = '';
+    static taskOfSearchingListPressed = '';
 
     createNewTaskHandler(event, task){
         const createNewTaskDialog = document.createElement('dialog');
+        createNewTaskDialog.setAttribute('id', DomRenderizer.createFormDialogID);
+        const taskCreationForm = this.renderTaskCreationForm();
+        this.appendFormToContentCreationDialog(createNewTaskDialog, taskCreationForm);
+        //if (document.body.querySelector('#' + DomRenderizer.createFormDialogID)) document.body.removeChild(document.body.querySelector('#' + DomRenderizer.createFormDialogID));  
+        document.body.appendChild(createNewTaskDialog);
+        const cancelButton = this.createButton(DomRenderizer.cancelCreationFormButtonID, 'Cancel', (event) => createNewTaskDialog.close());
+        createNewTaskDialog.appendChild(cancelButton);
+        createNewTaskDialog.showModal();
     }
 
     createListWith(listItems, listClass){
@@ -440,13 +495,14 @@ class DomRenderizer {
         dueDateElement.setAttribute("value", task.getDueDate());
         dueDateElement.setAttribute("type", "date");
         dueDateElement.setAttribute("name", 'dueDate');
+        dueDateElement.setAttribute('readonly', true);
         this.addClassToClassListOf(dueDateElement, DomRenderizer.taskDueDateClass);
         return dueDateElement;
     }
 
-    createTitleElement(toDoElement, elementTag, elementClass){
+    createTitleElement(task, elementTag, elementClass){
         const titleElement       = document.createElement(elementTag);
-        titleElement.textContent = toDoElement.getTitle();
+        titleElement.textContent = task.getTitle();
         this.addClassToClassListOf(titleElement, elementClass);
         return titleElement;
     }

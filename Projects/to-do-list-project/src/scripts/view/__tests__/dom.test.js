@@ -6,9 +6,9 @@ import {Note} from "../../domain/notes.js";
 import "../domRenderizer.js";
 import { DomRenderizer } from "../domRenderizer.js";
 import defaultValues from "../../../appConstantValues.json" with {type: "json"};
-import { addDays, isSameDay } from "date-fns";
+import { addDays, isSameDay, addYears } from "date-fns";
 import { AppController } from "../../controllers/appController.js";
-import { addYears } from "date-fns";
+import { DomController } from "../../controllers/domController.js";
 
 /*Esqueleto de un test:
 describe('Funcionalidad: ', () => {
@@ -239,17 +239,14 @@ describe('Funcionalidad: Botón subtask de navbar de ConcreteTask renderizada mu
       const subtasksButton = navBar.querySelector('#' + DomRenderizer.renderedTaskInfoNavBarSubtaskButtonID);
       const taskComponentsContainer  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTasksComponentsContainerID);
       expect(concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID)).toBeNull();
-      expect(taskComponentsContainer).not.toBeNull();
-      expect(taskComponentsContainer).not.toBeUndefined();
+      assertNotNullAndDefined(taskComponentsContainer);
       subtasksButton.click();
       expect(concreteTask).toBeInstanceOf(ConcreteTask);
       const dependentsTaskContainer = taskComponentsContainer.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID);
-      expect(dependentsTaskContainer).not.toBeNull();
-      expect(dependentsTaskContainer).not.toBeUndefined();
+      assertNotNullAndDefined(dependentsTaskContainer);
       const dependentsTaskContainerOptions = dependentsTaskContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskID);
       expect(dependentsTaskContainerOptions.tagName.toLowerCase()).toBe(DomRenderizer.containersElementTag);
-      expect(dependentsTaskContainerOptions).not.toBeUndefined();
-      expect(dependentsTaskContainerOptions).not.toBeNull();
+      assertNotNullAndDefined(dependentsTaskContainerOptions);
       const textContainer = dependentsTaskContainerOptions.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskTextContainerID);
       const buttonToAddTasks = dependentsTaskContainerOptions.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksID);
       expect(textContainer.tagName.toLowerCase()).toBe('p');
@@ -265,17 +262,14 @@ describe('Funcionalidad: Botón subtask de navbar de ConcreteTask renderizada mu
     const subtasksButton = navBar.querySelector('#' + DomRenderizer.renderedTaskInfoNavBarSubtaskButtonID);
     const taskComponentsContainer  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTasksComponentsContainerID);
     expect(concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID)).toBeNull();
-    expect(taskComponentsContainer).not.toBeNull();
-    expect(taskComponentsContainer).not.toBeUndefined();
+    assertNotNullAndDefined(taskComponentsContainer);
     subtasksButton.click();
     expect(concreteTask).toBeInstanceOf(ConcreteTask);
     const dependentsTaskContainer = taskComponentsContainer.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID);
-    expect(dependentsTaskContainer).not.toBeNull();
-    expect(dependentsTaskContainer).not.toBeUndefined();
+    assertNotNullAndDefined(dependentsTaskContainer);
     const dependentsTaskContainerOptions = dependentsTaskContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskID);
     expect(dependentsTaskContainerOptions.tagName.toLowerCase()).toBe(DomRenderizer.containersElementTag);
-    expect(dependentsTaskContainerOptions).not.toBeUndefined();
-    expect(dependentsTaskContainerOptions).not.toBeNull();
+    assertNotNullAndDefined(dependentsTaskContainerOptions); 
     const textContainer = dependentsTaskContainerOptions.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskTextContainerID);
     const buttonToAddTasks = dependentsTaskContainerOptions.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksID);
     expect(textContainer.tagName.toLowerCase()).toBe('p');
@@ -294,11 +288,9 @@ describe('Funcionalidad: Botón subtask de navbar de ConcreteTask renderizada mu
     const dependentsTaskContainer = taskComponentsContainer.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID);
     const dependentsTaskContainerOptions = dependentsTaskContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskID);
     const buttonToAddTasksContainer = dependentsTaskContainerOptions.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonForAddTasksContainerID);
-    expect(buttonToAddTasksContainer).toBeDefined();
-    expect(buttonToAddTasksContainer).not.toBeNull();
+    assertNotNullAndDefined(buttonToAddTasksContainer); 
     const buttonToAddTasks = buttonToAddTasksContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksID);
-    expect(buttonToAddTasks).toBeDefined();
-    expect(buttonToAddTasks).not.toBeNull();
+    assertNotNullAndDefined(buttonToAddTasks); 
   });
   test('Botón de addTask al ser presionado agrega ul con otros dos botones dentro', () => {
     const dom = new DomRenderizer();
@@ -314,15 +306,12 @@ describe('Funcionalidad: Botón subtask de navbar de ConcreteTask renderizada mu
     const buttonToAddTasks = buttonToAddTasksContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksID);
     buttonToAddTasks.click();
     const listContainer = buttonToAddTasksContainer.querySelector('.' + DomRenderizer.dropdownMenuClass);
-    expect(listContainer).toBeDefined();
-    expect(listContainer).not.toBeNull();
+    assertNotNullAndDefined(listContainer);
     const listContainerItems = listContainer.querySelectorAll('li');
     const addExistingTaskButton = listContainerItems[0];
-    expect(addExistingTaskButton).toBeDefined();
-    expect(addExistingTaskButton).not.toBeNull();
+    assertNotNullAndDefined(addExistingTaskButton);
     const createNewTaskButton = listContainerItems[1];
-    expect(createNewTaskButton).toBeDefined();
-    expect(createNewTaskButton).not.toBeNull();
+    assertNotNullAndDefined(createNewTaskButton);
     expect(listContainer.classList.contains(DomRenderizer.dropdownMenuClass)).toBeTruthy();
     expect(listContainer.tagName.toLowerCase()).toBe('ul');
     expect(listContainerItems[0].tagName.toLowerCase()).toBe('li');
@@ -350,15 +339,14 @@ describe('Funcionalidad: Botón subtask de navbar de ConcreteTask renderizada mu
     const buttonToAddTasks = buttonToAddTasksContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksID);
     buttonToAddTasks.click();
     let listContainer = buttonToAddTasksContainer.querySelector('.' + DomRenderizer.dropdownMenuClass);
-    expect(listContainer).toBeDefined();
-    expect(listContainer).not.toBeNull();
+    assertNotNullAndDefined(listContainer); 
     const buttonToAddTasksContainerPosition = buttonToAddTasksContainer.getBoundingClientRect();
     buttonToAddTasksContainer.dispatchEvent(new MouseEvent('mouseover', {clientX: buttonToAddTasksContainerPosition.left+1, clientY: buttonToAddTasksContainerPosition.top + 1}));
     listContainer = buttonToAddTasksContainer.querySelector('.' + DomRenderizer.dropdownMenuClass);
-    expect(listContainer).toBeDefined();
-    expect(listContainer).not.toBeNull();
+    assertNotNullAndDefined(listContainer); 
+
   });
-    test('Botón de addNewTask al hacerle click muestra formulario de creación de tareas', () => {
+  test('Botón de addNewTask al hacerle click muestra formulario de creación de tareas', () => {
     const dom = new DomRenderizer();
     const concreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
     const concreteTaskRendered = dom.renderTask(concreteTask);
@@ -372,8 +360,7 @@ describe('Funcionalidad: Botón subtask de navbar de ConcreteTask renderizada mu
     const buttonToAddTasks = buttonToAddTasksContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksID);
     buttonToAddTasks.click();
     const listContainer = buttonToAddTasksContainer.querySelector('.' + DomRenderizer.dropdownMenuClass);
-    expect(listContainer).toBeDefined();
-    expect(listContainer).not.toBeNull();
+    assertNotNullAndDefined(listContainer); 
     const listContainerItems = listContainer.querySelectorAll('li');
     const createNewTaskButton = listContainerItems[1].children[0];
     expect(document.body.querySelector('#' + DomRenderizer.formFieldsContainerID)).toBeNull();
@@ -381,19 +368,608 @@ describe('Funcionalidad: Botón subtask de navbar de ConcreteTask renderizada mu
     createNewTaskButton.click();
     const taskCreationDialog = document.body.querySelector('#' + DomRenderizer.createFormDialogID);
     const taskCreationForm = taskCreationDialog.querySelector('#' + DomRenderizer.formFieldsContainerID);
-    expect(taskCreationForm).not.toBeNull();
-    expect(taskCreationDialog).not.toBeNull();
-    expect(taskCreationDialog).toBeDefined();
-    expect(taskCreationForm).toBeDefined();
+    assertNotNullAndDefined(taskCreationForm);
+    assertNotNullAndDefined(taskCreationDialog);
     assertTaskCreationFormHasAllNeededFields(taskCreationForm);
-    const cancelButton = taskCreationDialog.querySelector('#' + cancelCreationFormButtonID);
+    const cancelButton = taskCreationDialog.querySelector('#' + DomRenderizer.cancelCreationFormButtonID);
     const submitButton = taskCreationDialog.querySelector('#' + DomRenderizer.creationFormSubmitButtonID);
-    expect(submitButton).toBeDefined();
-    expect(submitButton).not.toBeNull();
-    expect(cancelButton).toBeDefined();
-    expect(cancelButton).not.toBeNull();
+    assertNotNullAndDefined(submitButton);
+    assertNotNullAndDefined(cancelButton);
+  });
+  test('Cancel button close dialog when clicked', () => {
+    const dom = new DomRenderizer();
+    const concreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
+    const concreteTaskRendered = dom.renderTask(concreteTask);
+    const navBar  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTaskInfoNavBarID);
+    const subtasksButton = navBar.querySelector('#' + DomRenderizer.renderedTaskInfoNavBarSubtaskButtonID);
+    const taskComponentsContainer  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTasksComponentsContainerID);
+    subtasksButton.click();
+    const dependentsTaskContainer = taskComponentsContainer.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID);
+    const dependentsTaskContainerOptions = dependentsTaskContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskID);
+    const buttonToAddTasksContainer = dependentsTaskContainerOptions.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonForAddTasksContainerID);
+    const buttonToAddTasks = buttonToAddTasksContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksID);
+    buttonToAddTasks.click();
+    const listContainer = buttonToAddTasksContainer.querySelector('.' + DomRenderizer.dropdownMenuClass);
+    assertNotNullAndDefined(listContainer);
+    const listContainerItems = listContainer.querySelectorAll('li');
+    const createNewTaskButton = listContainerItems[1].children[0];
+    expect(document.body.querySelector('#' + DomRenderizer.formFieldsContainerID)).toBeNull();
+    expect(document.body.querySelector('#' + DomRenderizer.createFormDialogID)).toBeNull();
+    createNewTaskButton.click();
+    const taskCreationDialog = document.body.querySelector('#' + DomRenderizer.createFormDialogID);
+    assertNotNullAndDefined(taskCreationDialog);
+    const cancelButton = taskCreationDialog.querySelector('#' + DomRenderizer.cancelCreationFormButtonID);
+    assertNotNullAndDefined(cancelButton);
+    expect(taskCreationDialog.open).toBeTruthy();
+    cancelButton.click();
+    expect(taskCreationDialog.open).toBeFalsy();
+  });
+  test('Create task button delivers form info to app controller and closes dialog', () => {
+    let taskFormInfo;
+    const appController = {createTaskByFormInfo: (userData) => taskFormInfo = userData}
+    const dom = new DomRenderizer(appController);
+    const concreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
+    const concreteTaskRendered = dom.renderTask(concreteTask);
+    const navBar  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTaskInfoNavBarID);
+    const subtasksButton = navBar.querySelector('#' + DomRenderizer.renderedTaskInfoNavBarSubtaskButtonID);
+    const taskComponentsContainer  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTasksComponentsContainerID);
+    subtasksButton.click();
+    const dependentsTaskContainer = taskComponentsContainer.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID);
+    const dependentsTaskContainerOptions = dependentsTaskContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskID);
+    const buttonToAddTasksContainer = dependentsTaskContainerOptions.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonForAddTasksContainerID);
+    const buttonToAddTasks = buttonToAddTasksContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksID);
+    buttonToAddTasks.click();
+    const listContainer = buttonToAddTasksContainer.querySelector('.' + DomRenderizer.dropdownMenuClass);
+    assertNotNullAndDefined(listContainer);
+    const listContainerItems = listContainer.querySelectorAll('li');
+    const createNewTaskButton = listContainerItems[1].children[0];
+    expect(document.body.querySelector('#' + DomRenderizer.formFieldsContainerID)).toBeNull();
+    let taskCreationDialog = document.body.querySelector('#' + DomRenderizer.createFormDialogID);
+    expect(taskCreationDialog).toBeNull();
+    createNewTaskButton.click();
+    taskCreationDialog = document.body.querySelector('#' + DomRenderizer.createFormDialogID);
+    assertNotNullAndDefined(taskCreationDialog);
+    const taskForm = document.body.querySelector('#' + DomRenderizer.formFieldsContainerID);
+    const submitButton = taskForm.querySelector('#' + DomRenderizer.creationFormSubmitButtonID);
+    const cancelButton = taskCreationDialog.querySelector('#' + DomRenderizer.cancelCreationFormButtonID);
+    fillTaskForm(document.body.querySelector('#' + DomRenderizer.formFieldsContainerID));    
+    assertNotNullAndDefined(submitButton);
+    expect(taskCreationDialog.open).toBeTruthy();
+    submitButton.click();
+    //Testeando que esté dentro del from, que sea de tipo submit y que el método del form sea dialog sé por especificación HTML que el dialog se cerrará. No puedo usar dialog.open porque en jsdom el elemento HTMLDialog no está completamente implementado
+    expect(submitButton.getAttribute('form')).toBe(DomRenderizer.formFieldsContainerID);
+    expect(submitButton.getAttribute('type')).toBe('submit');
+    expect(document.body.querySelector('#' + DomRenderizer.formFieldsContainerID).getAttribute('method')).toBe('dialog');
+    
+    expect(taskFormInfo.title).toBe("taskTitle");
+    expect(taskFormInfo.description).toBe("taskDescription");
+    expect(taskFormInfo.dueDate).toBe(new Date().toISOString().split('T')[0]);
+    expect(taskFormInfo.priorityValue).toBe(String(defaultValues.taskPriorities.minPriorityValue));
+  });
+  test('add existing task button display taskSearchingDialog', () => {
+    let getAllTasksCalled = false;
+    const appController = {getAllTasks: () => {
+      getAllTasksCalled = true;
+      return [];
+      }
+    };
+    const dom = new DomRenderizer(appController);
+    const concreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
+    const concreteTaskRendered = dom.renderTask(concreteTask);
+    const navBar  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTaskInfoNavBarID);
+    const subtasksButton = navBar.querySelector('#' + DomRenderizer.renderedTaskInfoNavBarSubtaskButtonID);
+    const taskComponentsContainer  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTasksComponentsContainerID);
+    subtasksButton.click();
+    const dependentsTaskContainer = taskComponentsContainer.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID);
+    const dependentsTaskContainerOptions = dependentsTaskContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskID);
+    const buttonToAddTasksContainer = dependentsTaskContainerOptions.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonForAddTasksContainerID);
+    const buttonToAddTasks = buttonToAddTasksContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksID);
+    buttonToAddTasks.click();
+    const listContainer = buttonToAddTasksContainer.querySelector('.' + DomRenderizer.dropdownMenuClass);
+    const listContainerItems = listContainer.querySelectorAll('li');
+    const addExistingTaskButton = listContainerItems[0].children[0];
+    expect(document.body.querySelector('#' + DomRenderizer.formFieldsContainerID)).toBeNull();
+    let taskSearchingDialog = document.body.querySelector('#' + DomRenderizer.searchingTaskDialogID);
+    expect(taskSearchingDialog).toBeNull();
+    addExistingTaskButton.click();
+    taskSearchingDialog = document.body.querySelector('#' + DomRenderizer.searchingTaskDialogID);
+    assertNotNullAndDefined(taskSearchingDialog);
+    expect(taskSearchingDialog.open).toBeTruthy();
+  });
+  test('add existing task button display taskSearchingDialog and calls appController asking for all tasks with task as parameter', () => {
+    let getAllTasksCalled = false;
+    let receivedTask;
+    const appController = {getAllTasks: (task) => {
+      getAllTasksCalled = true;
+      receivedTask = task;
+      return [];
+      }
+    };
+    const dom = new DomRenderizer(appController);
+    const concreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
+    const concreteTaskRendered = dom.renderTask(concreteTask);
+    const navBar  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTaskInfoNavBarID);
+    const subtasksButton = navBar.querySelector('#' + DomRenderizer.renderedTaskInfoNavBarSubtaskButtonID);
+    const taskComponentsContainer  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTasksComponentsContainerID);
+    subtasksButton.click();
+    const dependentsTaskContainer = taskComponentsContainer.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID);
+    const dependentsTaskContainerOptions = dependentsTaskContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskID);
+    const buttonToAddTasksContainer = dependentsTaskContainerOptions.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonForAddTasksContainerID);
+    const buttonToAddTasks = buttonToAddTasksContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksID);
+    buttonToAddTasks.click();
+    const listContainer = buttonToAddTasksContainer.querySelector('.' + DomRenderizer.dropdownMenuClass);
+    const listContainerItems = listContainer.querySelectorAll('li');
+    const addExistingTaskButton = listContainerItems[0].children[0];
+    expect(document.body.querySelector('#' + DomRenderizer.formFieldsContainerID)).toBeNull();
+    let taskSearchingDialog = document.body.querySelector('#' + DomRenderizer.searchingTaskDialogID);
+    expect(taskSearchingDialog).toBeNull();
+    addExistingTaskButton.click();
+    taskSearchingDialog = document.body.querySelector('#' + DomRenderizer.searchingTaskDialogID);
+    expect(getAllTasksCalled).toBeTruthy();
+    expect(receivedTask).toBe(concreteTask);
+  });
+  test('add existing dialog has main content container', () => {
+    let getAllTasksCalled = false;
+    let receivedTask;
+    const appController = {getAllTasks: (task) => {
+      getAllTasksCalled = true;
+      receivedTask = task;
+      return [];
+      }
+    };
+    const dom = new DomRenderizer(appController);
+    const concreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
+    const concreteTaskRendered = dom.renderTask(concreteTask);
+    const navBar  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTaskInfoNavBarID);
+    const subtasksButton = navBar.querySelector('#' + DomRenderizer.renderedTaskInfoNavBarSubtaskButtonID);
+    const taskComponentsContainer  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTasksComponentsContainerID);
+    subtasksButton.click();
+    const dependentsTaskContainer = taskComponentsContainer.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID);
+    const dependentsTaskContainerOptions = dependentsTaskContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskID);
+    const buttonToAddTasksContainer = dependentsTaskContainerOptions.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonForAddTasksContainerID);
+    const buttonToAddTasks = buttonToAddTasksContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksID);
+    buttonToAddTasks.click();
+    const listContainer = buttonToAddTasksContainer.querySelector('.' + DomRenderizer.dropdownMenuClass);
+    const listContainerItems = listContainer.querySelectorAll('li');
+    const addExistingTaskButton = listContainerItems[0].children[0];
+    expect(document.body.querySelector('#' + DomRenderizer.formFieldsContainerID)).toBeNull();
+    let taskSearchingDialog = document.body.querySelector('#' + DomRenderizer.searchingTaskDialogID);
+    expect(taskSearchingDialog).toBeNull();
+    addExistingTaskButton.click();
+    taskSearchingDialog = document.body.querySelector('#' + DomRenderizer.searchingTaskDialogID);
+    assertNotNullAndDefined(taskSearchingDialog.querySelector('#' + DomRenderizer.taskSearchingDialogMainContentContainerID));
+  });  
+  test('add existing dialog has main content container with list for tasks', () => {
+    let getAllTasksCalled = false;
+    let receivedTask;
+    const appController = {getAllTasks: (task) => {
+      getAllTasksCalled = true;
+      receivedTask = task;
+      return [];
+      }
+    };
+    const dom = new DomRenderizer(appController);
+    const concreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
+    const concreteTaskRendered = dom.renderTask(concreteTask);
+    const navBar  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTaskInfoNavBarID);
+    const subtasksButton = navBar.querySelector('#' + DomRenderizer.renderedTaskInfoNavBarSubtaskButtonID);
+    const taskComponentsContainer  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTasksComponentsContainerID);
+    subtasksButton.click();
+    const dependentsTaskContainer = taskComponentsContainer.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID);
+    const dependentsTaskContainerOptions = dependentsTaskContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskID);
+    const buttonToAddTasksContainer = dependentsTaskContainerOptions.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonForAddTasksContainerID);
+    const buttonToAddTasks = buttonToAddTasksContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksID);
+    buttonToAddTasks.click();
+    const listContainer = buttonToAddTasksContainer.querySelector('.' + DomRenderizer.dropdownMenuClass);
+    const listContainerItems = listContainer.querySelectorAll('li');
+    const addExistingTaskButton = listContainerItems[0].children[0];
+    expect(document.body.querySelector('#' + DomRenderizer.formFieldsContainerID)).toBeNull();
+    let taskSearchingDialog = document.body.querySelector('#' + DomRenderizer.searchingTaskDialogID);
+    expect(taskSearchingDialog).toBeNull();
+    addExistingTaskButton.click();
+    taskSearchingDialog = document.body.querySelector('#' + DomRenderizer.searchingTaskDialogID);
+    const serchingDialogMainContentContainer = taskSearchingDialog.querySelector('#' + DomRenderizer.taskSearchingDialogMainContentContainerID); 
+    assertNotNullAndDefined(serchingDialogMainContentContainer);
+    const listOfTaskToAdd = serchingDialogMainContentContainer.querySelector('ul');
+    assertNotNullAndDefined(listOfTaskToAdd);
+  });
+  test('add existing dialog has main content container with list for tasks with as many li as tasks returned by appController with searchingListItemID', () => {
+    const concreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
+    const anotherConcreteTask = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.minPriorityValue, 'aTitle', 'aDescription');
+    const taskOptions = [concreteTask, anotherConcreteTask]; 
+    const appController = {getAllTasks: (task) => {
+      return taskOptions;
+      }
+    };
+    const dom = new DomRenderizer(appController);
+    const concreteTaskRendered = dom.renderTask(concreteTask);
+    const navBar  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTaskInfoNavBarID);
+    const subtasksButton = navBar.querySelector('#' + DomRenderizer.renderedTaskInfoNavBarSubtaskButtonID);
+    const taskComponentsContainer  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTasksComponentsContainerID);
+    subtasksButton.click();
+    const dependentsTaskContainer = taskComponentsContainer.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID);
+    const dependentsTaskContainerOptions = dependentsTaskContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskID);
+    const buttonToAddTasksContainer = dependentsTaskContainerOptions.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonForAddTasksContainerID);
+    const buttonToAddTasks = buttonToAddTasksContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksID);
+    buttonToAddTasks.click();
+    const listContainer = buttonToAddTasksContainer.querySelector('.' + DomRenderizer.dropdownMenuClass);
+    const listContainerItems = listContainer.querySelectorAll('li');
+    const addExistingTaskButton = listContainerItems[0].children[0];
+    expect(document.body.querySelector('#' + DomRenderizer.formFieldsContainerID)).toBeNull();
+    let taskSearchingDialog = document.body.querySelector('#' + DomRenderizer.searchingTaskDialogID);
+    expect(taskSearchingDialog).toBeNull();
+    addExistingTaskButton.click();
+    taskSearchingDialog = document.body.querySelector('#' + DomRenderizer.searchingTaskDialogID);
+    const serchingDialogMainContentContainer = taskSearchingDialog.querySelector('#' + DomRenderizer.taskSearchingDialogMainContentContainerID); 
+    assertNotNullAndDefined(serchingDialogMainContentContainer);
+    const listOfTaskToAdd = serchingDialogMainContentContainer.querySelector('ul');
+    assertNotNullAndDefined(listOfTaskToAdd);
+    const listItems = listOfTaskToAdd.querySelectorAll('li');
+    expect(Array.from(listItems).every(listItem => listItem.getAttribute('id') === DomRenderizer.searchingListItemID)).toBeTruthy();
+    expect(listItems.length).toBe(taskOptions.length);
+    assertNotNullAndDefined(listItems[0]);
+    assertNotNullAndDefined(listItems[1]);
+  });
+  test('searchingListItemID has task title', () => {
+    const concreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
+    const anotherConcreteTask = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.minPriorityValue, 'aTitle', 'aDescription');
+    const taskOptions = [concreteTask, anotherConcreteTask]; 
+    const appController = {getAllTasks: (task) => {
+      return taskOptions;
+      }
+    };
+    const dom = new DomRenderizer(appController);
+    const concreteTaskRendered = dom.renderTask(concreteTask);
+    const navBar  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTaskInfoNavBarID);
+    const subtasksButton = navBar.querySelector('#' + DomRenderizer.renderedTaskInfoNavBarSubtaskButtonID);
+    const taskComponentsContainer  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTasksComponentsContainerID);
+    subtasksButton.click();
+    const dependentsTaskContainer = taskComponentsContainer.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID);
+    const dependentsTaskContainerOptions = dependentsTaskContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskID);
+    const buttonToAddTasksContainer = dependentsTaskContainerOptions.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonForAddTasksContainerID);
+    const buttonToAddTasks = buttonToAddTasksContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksID);
+    buttonToAddTasks.click();
+    const listContainer = buttonToAddTasksContainer.querySelector('.' + DomRenderizer.dropdownMenuClass);
+    const listContainerItems = listContainer.querySelectorAll('li');
+    const addExistingTaskButton = listContainerItems[0].children[0];
+    expect(document.body.querySelector('#' + DomRenderizer.formFieldsContainerID)).toBeNull();
+    let taskSearchingDialog = document.body.querySelector('#' + DomRenderizer.searchingTaskDialogID);
+    expect(taskSearchingDialog).toBeNull();
+    addExistingTaskButton.click();
+    taskSearchingDialog = document.body.querySelector('#' + DomRenderizer.searchingTaskDialogID);
+    const serchingDialogMainContentContainer = taskSearchingDialog.querySelector('#' + DomRenderizer.taskSearchingDialogMainContentContainerID); 
+    assertNotNullAndDefined(serchingDialogMainContentContainer);
+    const listOfTaskToAdd = serchingDialogMainContentContainer.querySelector('ul');
+    assertNotNullAndDefined(listOfTaskToAdd);
+    const listItems = listOfTaskToAdd.querySelectorAll('li');
+    expect(listItems.length).toBe(taskOptions.length);
+    assertElementOfTaskTitleElementIsCorrect(listItems[0], taskOptions[0]);
+    assertElementOfTaskTitleElementIsCorrect(listItems[1], taskOptions[1]);
+  });
+  test('searchingListItemID has task description', () => {
+    const concreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
+    const anotherConcreteTask = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.minPriorityValue, 'aTitle', 'aDescription');
+    const taskOptions = [concreteTask, anotherConcreteTask]; 
+    const appController = {getAllTasks: (task) => {
+      return taskOptions;
+      }
+    };
+    const dom = new DomRenderizer(appController);
+    const concreteTaskRendered = dom.renderTask(concreteTask);
+    const navBar  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTaskInfoNavBarID);
+    const subtasksButton = navBar.querySelector('#' + DomRenderizer.renderedTaskInfoNavBarSubtaskButtonID);
+    const taskComponentsContainer  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTasksComponentsContainerID);
+    subtasksButton.click();
+    const dependentsTaskContainer = taskComponentsContainer.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID);
+    const dependentsTaskContainerOptions = dependentsTaskContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskID);
+    const buttonToAddTasksContainer = dependentsTaskContainerOptions.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonForAddTasksContainerID);
+    const buttonToAddTasks = buttonToAddTasksContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksID);
+    buttonToAddTasks.click();
+    const listContainer = buttonToAddTasksContainer.querySelector('.' + DomRenderizer.dropdownMenuClass);
+    const listContainerItems = listContainer.querySelectorAll('li');
+    const addExistingTaskButton = listContainerItems[0].children[0];
+    expect(document.body.querySelector('#' + DomRenderizer.formFieldsContainerID)).toBeNull();
+    let taskSearchingDialog = document.body.querySelector('#' + DomRenderizer.searchingTaskDialogID);
+    expect(taskSearchingDialog).toBeNull();
+    addExistingTaskButton.click();
+    taskSearchingDialog = document.body.querySelector('#' + DomRenderizer.searchingTaskDialogID);
+    const serchingDialogMainContentContainer = taskSearchingDialog.querySelector('#' + DomRenderizer.taskSearchingDialogMainContentContainerID); 
+    assertNotNullAndDefined(serchingDialogMainContentContainer);
+    const listOfTaskToAdd = serchingDialogMainContentContainer.querySelector('ul');
+    assertNotNullAndDefined(listOfTaskToAdd);
+    const listItems = listOfTaskToAdd.querySelectorAll('li');
+    expect(listItems.length).toBe(taskOptions.length);
+    assertElementOfTaskDescriptionElementIsCorrect(listItems[0], taskOptions[0]);
+    assertElementOfTaskDescriptionElementIsCorrect(listItems[1], taskOptions[1]);
+  });
+  test('searchingListItemID has task due date', () => {
+    const concreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
+    const anotherConcreteTask = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.minPriorityValue, 'aTitle', 'aDescription');
+    const taskOptions = [concreteTask, anotherConcreteTask]; 
+    const appController = {getAllTasks: (task) => {
+      return taskOptions;
+      }
+    };
+    const dom = new DomRenderizer(appController);
+    const concreteTaskRendered = dom.renderTask(concreteTask);
+    const navBar  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTaskInfoNavBarID);
+    const subtasksButton = navBar.querySelector('#' + DomRenderizer.renderedTaskInfoNavBarSubtaskButtonID);
+    const taskComponentsContainer  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTasksComponentsContainerID);
+    subtasksButton.click();
+    const dependentsTaskContainer = taskComponentsContainer.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID);
+    const dependentsTaskContainerOptions = dependentsTaskContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskID);
+    const buttonToAddTasksContainer = dependentsTaskContainerOptions.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonForAddTasksContainerID);
+    const buttonToAddTasks = buttonToAddTasksContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksID);
+    buttonToAddTasks.click();
+    const listContainer = buttonToAddTasksContainer.querySelector('.' + DomRenderizer.dropdownMenuClass);
+    const listContainerItems = listContainer.querySelectorAll('li');
+    const addExistingTaskButton = listContainerItems[0].children[0];
+    expect(document.body.querySelector('#' + DomRenderizer.formFieldsContainerID)).toBeNull();
+    let taskSearchingDialog = document.body.querySelector('#' + DomRenderizer.searchingTaskDialogID);
+    expect(taskSearchingDialog).toBeNull();
+    addExistingTaskButton.click();
+    taskSearchingDialog = document.body.querySelector('#' + DomRenderizer.searchingTaskDialogID);
+    const serchingDialogMainContentContainer = taskSearchingDialog.querySelector('#' + DomRenderizer.taskSearchingDialogMainContentContainerID); 
+    assertNotNullAndDefined(serchingDialogMainContentContainer);
+    const listOfTaskToAdd = serchingDialogMainContentContainer.querySelector('ul');
+    assertNotNullAndDefined(listOfTaskToAdd);
+    const listItems = listOfTaskToAdd.querySelectorAll('li');
+    expect(listItems.length).toBe(taskOptions.length);
+    assertElementOfTaskDueDateIsCorrect(listItems[1], taskOptions[1], true);
+    assertElementOfTaskDueDateIsCorrect(listItems[0], taskOptions[0], true);
+});
+  test('searchingListItemID has task priority', () => {
+    const concreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
+    const anotherConcreteTask = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.minPriorityValue, 'aTitle', 'aDescription');
+    const taskOptions = [concreteTask, anotherConcreteTask]; 
+    const appController = {getAllTasks: (task) => {
+      return taskOptions;
+      }
+    };
+    const dom = new DomRenderizer(appController);
+    const concreteTaskRendered = dom.renderTask(concreteTask);
+    const navBar  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTaskInfoNavBarID);
+    const subtasksButton = navBar.querySelector('#' + DomRenderizer.renderedTaskInfoNavBarSubtaskButtonID);
+    const taskComponentsContainer  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTasksComponentsContainerID);
+    subtasksButton.click();
+    const dependentsTaskContainer = taskComponentsContainer.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID);
+    const dependentsTaskContainerOptions = dependentsTaskContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskID);
+    const buttonToAddTasksContainer = dependentsTaskContainerOptions.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonForAddTasksContainerID);
+    const buttonToAddTasks = buttonToAddTasksContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksID);
+    buttonToAddTasks.click();
+    const listContainer = buttonToAddTasksContainer.querySelector('.' + DomRenderizer.dropdownMenuClass);
+    const listContainerItems = listContainer.querySelectorAll('li');
+    const addExistingTaskButton = listContainerItems[0].children[0];
+    expect(document.body.querySelector('#' + DomRenderizer.formFieldsContainerID)).toBeNull();
+    let taskSearchingDialog = document.body.querySelector('#' + DomRenderizer.searchingTaskDialogID);
+    expect(taskSearchingDialog).toBeNull();
+    addExistingTaskButton.click();
+    taskSearchingDialog = document.body.querySelector('#' + DomRenderizer.searchingTaskDialogID);
+    const serchingDialogMainContentContainer = taskSearchingDialog.querySelector('#' + DomRenderizer.taskSearchingDialogMainContentContainerID); 
+    assertNotNullAndDefined(serchingDialogMainContentContainer);
+    const listOfTaskToAdd = serchingDialogMainContentContainer.querySelector('ul');
+    assertNotNullAndDefined(listOfTaskToAdd);
+    const listItems = listOfTaskToAdd.querySelectorAll('li');
+    expect(listItems.length).toBe(taskOptions.length);
+    assertElementOfTaskPriorityIsCorrect(listItems[0], taskOptions[0], false);
+    assertElementOfTaskPriorityIsCorrect(listItems[1], taskOptions[1], false);
+  });
+  test('click a task and press submit sends task to add to the appcontroller', () => {
+    const concreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
+    const anotherConcreteTask = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.minPriorityValue, 'aTitle', 'aDescription');
+    const taskOptions = [anotherConcreteTask]; 
+    let subtasksList;
+    let taskToAddSubtasks;
+    const appController = {
+      getAllTasks: (task) => taskOptions,
+      addSubtasksTo: (subtasks, task) => {
+        subtasksList = subtasks;
+        taskToAddSubtasks = task;
+        return true;
+      }
+    };
+    const dom = new DomRenderizer(appController);
+    const concreteTaskRendered = dom.renderTask(concreteTask);
+    const navBar  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTaskInfoNavBarID);
+    const subtasksButton = navBar.querySelector('#' + DomRenderizer.renderedTaskInfoNavBarSubtaskButtonID);
+    const taskComponentsContainer  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTasksComponentsContainerID);
+    subtasksButton.click();
+    const dependentsTaskContainer = taskComponentsContainer.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID);
+    const dependentsTaskContainerOptions = dependentsTaskContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskID);
+    const buttonToAddTasksContainer = dependentsTaskContainerOptions.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonForAddTasksContainerID);
+    const buttonToAddTasks = buttonToAddTasksContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksID);
+    buttonToAddTasks.click();
+    const listContainer = buttonToAddTasksContainer.querySelector('.' + DomRenderizer.dropdownMenuClass);
+    const listContainerItems = listContainer.querySelectorAll('li');
+    const addExistingTaskButton = listContainerItems[0].children[0];
+    addExistingTaskButton.click();
+    const taskSearchingDialog = document.body.querySelector('#' + DomRenderizer.searchingTaskDialogID);
+    const serchingDialogMainContentContainer = taskSearchingDialog.querySelector('#' + DomRenderizer.taskSearchingDialogMainContentContainerID); 
+    const submitButton = serchingDialogMainContentContainer.querySelector('#' + DomRenderizer.searchingDialogSubmitButtonID);
+    assertNotNullAndDefined(submitButton);
+    const listOfTaskToAdd = serchingDialogMainContentContainer.querySelector('ul');
+    assertNotNullAndDefined(listOfTaskToAdd);
+    const listItems = listOfTaskToAdd.querySelectorAll('li');
+    listItems[0].click();
+    submitButton.click();
+    expect(subtasksList).toEqual([anotherConcreteTask]);
+    expect(taskToAddSubtasks).toEqual(concreteTask)
+  });
+  test('click tasks and press submit sends all pressed tasks to add to the appcontroller', () => {
+    const concreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
+    const oneMoreTask = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[1], taskDescriptions[1]);
+    const subtasksOwner = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, 'subtasksOwner', 'a');
+    const anotherConcreteTask = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.minPriorityValue, 'aTitle', 'aDescription');
+    const taskOptions = [concreteTask, anotherConcreteTask, oneMoreTask]; 
+    let subtasksList;
+    let taskToAddSubtasks;
+    const appController = {
+      getAllTasks: (task) => taskOptions,
+      addSubtasksTo: (subtasks, task) => {
+        subtasksList = subtasks;
+        taskToAddSubtasks = task;
+        return true;
+      }
+    };
+    const dom = new DomRenderizer(appController);
+    const concreteTaskRendered = dom.renderTask(subtasksOwner);
+    const navBar  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTaskInfoNavBarID);
+    const subtasksButton = navBar.querySelector('#' + DomRenderizer.renderedTaskInfoNavBarSubtaskButtonID);
+    const taskComponentsContainer  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTasksComponentsContainerID);
+    subtasksButton.click();
+    const dependentsTaskContainer = taskComponentsContainer.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID);
+    const dependentsTaskContainerOptions = dependentsTaskContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskID);
+    const buttonToAddTasksContainer = dependentsTaskContainerOptions.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonForAddTasksContainerID);
+    const buttonToAddTasks = buttonToAddTasksContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksID);
+    buttonToAddTasks.click();
+    const listContainer = buttonToAddTasksContainer.querySelector('.' + DomRenderizer.dropdownMenuClass);
+    const listContainerItems = listContainer.querySelectorAll('li');
+    const addExistingTaskButton = listContainerItems[0].children[0];
+    addExistingTaskButton.click();
+    const taskSearchingDialog = document.body.querySelector('#' + DomRenderizer.searchingTaskDialogID);
+    const serchingDialogMainContentContainer = taskSearchingDialog.querySelector('#' + DomRenderizer.taskSearchingDialogMainContentContainerID); 
+    const submitButton = serchingDialogMainContentContainer.querySelector('#' + DomRenderizer.searchingDialogSubmitButtonID);
+    assertNotNullAndDefined(submitButton);
+    const listOfTaskToAdd = serchingDialogMainContentContainer.querySelector('ul');
+    assertNotNullAndDefined(listOfTaskToAdd);
+    const listItems = listOfTaskToAdd.querySelectorAll('li');
+    listItems[0].click();
+    listItems[2].click();
+    submitButton.click();
+    expect(subtasksList).toEqual([concreteTask, oneMoreTask]);
+    expect(taskToAddSubtasks).toEqual(subtasksOwner);
+  });
+  test('add existing task dialog has cancel button', () => {
+    const concreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
+    const oneMoreTask = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[1], taskDescriptions[1]);
+    const subtasksOwner = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, 'subtasksOwner', 'a');
+    const anotherConcreteTask = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.minPriorityValue, 'aTitle', 'aDescription');
+    const taskOptions = [concreteTask, anotherConcreteTask, oneMoreTask]; 
+    let subtasksList;
+    let taskToAddSubtasks;
+    const appController = {
+      getAllTasks: (task) => taskOptions,
+      addSubtasksTo: (subtasks, task) => {
+        subtasksList = subtasks;
+        taskToAddSubtasks = task;
+        return true;
+      }
+    };
+    const dom = new DomRenderizer(appController);
+    const concreteTaskRendered = dom.renderTask(subtasksOwner);
+    const navBar  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTaskInfoNavBarID);
+    const subtasksButton = navBar.querySelector('#' + DomRenderizer.renderedTaskInfoNavBarSubtaskButtonID);
+    const taskComponentsContainer  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTasksComponentsContainerID);
+    subtasksButton.click();
+    const dependentsTaskContainer = taskComponentsContainer.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID);
+    const dependentsTaskContainerOptions = dependentsTaskContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskID);
+    const buttonToAddTasksContainer = dependentsTaskContainerOptions.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonForAddTasksContainerID);
+    const buttonToAddTasks = buttonToAddTasksContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksID);
+    buttonToAddTasks.click();
+    const listContainer = buttonToAddTasksContainer.querySelector('.' + DomRenderizer.dropdownMenuClass);
+    const listContainerItems = listContainer.querySelectorAll('li');
+    const addExistingTaskButton = listContainerItems[0].children[0];
+    addExistingTaskButton.click();
+    const taskSearchingDialog = document.body.querySelector('#' + DomRenderizer.searchingTaskDialogID);
+    const serchingDialogMainContentContainer = taskSearchingDialog.querySelector('#' + DomRenderizer.taskSearchingDialogMainContentContainerID); 
+    const submitButton = serchingDialogMainContentContainer.querySelector('#' + DomRenderizer.searchingDialogSubmitButtonID);
+    const cancelButton = serchingDialogMainContentContainer.querySelector('#' + DomRenderizer.searchingDialogCancelButtonID);
+    assertNotNullAndDefined(submitButton);
+    assertNotNullAndDefined(cancelButton);
+  });
+  test('press add existing task dialog cancel button close dialog', () => {
+    const concreteTask = Task.createConcreteTask(taskDueDates[0], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[0], taskDescriptions[0]);
+    const oneMoreTask = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[1], taskDescriptions[1]);
+    const subtasksOwner = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, 'subtasksOwner', 'a');
+    const anotherConcreteTask = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.minPriorityValue, 'aTitle', 'aDescription');
+    const taskOptions = [concreteTask, anotherConcreteTask, oneMoreTask]; 
+    let subtasksList;
+    let taskToAddSubtasks;
+    const appController = {
+      getAllTasks: (task) => taskOptions,
+      addSubtasksTo: (subtasks, task) => {
+        subtasksList = subtasks;
+        taskToAddSubtasks = task;
+        return true;
+      }
+    };
+    const dom = new DomRenderizer(appController);
+    const concreteTaskRendered = dom.renderTask(subtasksOwner);
+    const navBar  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTaskInfoNavBarID);
+    const subtasksButton = navBar.querySelector('#' + DomRenderizer.renderedTaskInfoNavBarSubtaskButtonID);
+    const taskComponentsContainer  = concreteTaskRendered.querySelector("#" + DomRenderizer.renderedTasksComponentsContainerID);
+    subtasksButton.click();
+    const dependentsTaskContainer = taskComponentsContainer.querySelector("#" + DomRenderizer.renderedTaskDependentsTasksContainerID);
+    const dependentsTaskContainerOptions = dependentsTaskContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskID);
+    const buttonToAddTasksContainer = dependentsTaskContainerOptions.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonForAddTasksContainerID);
+    const buttonToAddTasks = buttonToAddTasksContainer.querySelector('#' + DomRenderizer.dependentsTaskContainerOptionsForConcreteTaskButtonToAddTasksID);
+    buttonToAddTasks.click();
+    const listContainer = buttonToAddTasksContainer.querySelector('.' + DomRenderizer.dropdownMenuClass);
+    const listContainerItems = listContainer.querySelectorAll('li');
+    const addExistingTaskButton = listContainerItems[0].children[0];
+    addExistingTaskButton.click();
+    const taskSearchingDialog = document.body.querySelector('#' + DomRenderizer.searchingTaskDialogID);
+    const serchingDialogMainContentContainer = taskSearchingDialog.querySelector('#' + DomRenderizer.taskSearchingDialogMainContentContainerID); 
+    const submitButton = serchingDialogMainContentContainer.querySelector('#' + DomRenderizer.searchingDialogSubmitButtonID);
+    const cancelButton = serchingDialogMainContentContainer.querySelector('#' + DomRenderizer.searchingDialogCancelButtonID);
+    expect(taskSearchingDialog.open).toBeTruthy();
+    cancelButton.click();
+    expect(taskSearchingDialog.open).toBeFalsy();
   });
 });
+
+function assertCanSelectAListItemByClickAndSubmitSendsThemToAppController(listItem, submitButton){
+  listItem.click();
+  submitButton.click();
+}
+
+function assertNotNullAndDefined(element){
+  expect(element).not.toBeNull();
+  expect(element).toBeDefined();
+}
+
+function assertElementOfTaskTitleElementIsCorrect(taskTitleElementsContainer, task){
+  const taskTitleElement = taskTitleElementsContainer.querySelector(DomRenderizer.elementsTagForTaskTitles);
+  assertNotNullAndDefined(taskTitleElement);
+  expect(taskTitleElement.textContent).toBe(task.getTitle());
+  assertHasTagName(taskTitleElement, DomRenderizer.elementsTagForTaskTitles);
+}
+
+
+function assertElementOfTaskDescriptionElementIsCorrect(taskDescriptionElementsContainer, task){
+  const taskDescriptionElement = taskDescriptionElementsContainer.querySelector(DomRenderizer.elementsTagForTaskDescriptions);
+  assertNotNullAndDefined(taskDescriptionElement);
+  expect(taskDescriptionElement.textContent).toBe(task.getDescription());
+  assertHasTagName(taskDescriptionElement, DomRenderizer.elementsTagForTaskDescriptions);
+}
+
+
+function assertElementOfTaskDueDateIsCorrect(taskDueDateElementsContainer, task, readonly = false){
+  const taskDueDateElement = taskDueDateElementsContainer.querySelector(DomRenderizer.elementsTagForTaskDueDate);
+  assertNotNullAndDefined(taskDueDateElement);
+  expect(taskDueDateElement.getAttribute('value')).toBe(task.getDueDate());
+  assertHasTagName(taskDueDateElement, DomRenderizer.elementsTagForTaskDueDate);
+  expect(taskDueDateElement.getAttribute('type')).toBe('date');
+  expect(taskDueDateElement.getAttribute('name')).toBe('dueDate');
+  if (readonly){
+    expect(taskDueDateElement.getAttribute('readonly')).toBeTruthy();
+  }
+}
+
+function assertElementOfTaskPriorityIsCorrect(taskPriorityElementsContainer, task, readonly = false){
+  const taskPriorityElement = taskPriorityElementsContainer.querySelector(DomRenderizer.elementsTagForTaskPriority + `[class=${DomRenderizer.taskPriorityClass}]`);
+  assertNotNullAndDefined(taskPriorityElement);
+  expect(taskPriorityElement.getAttribute('value')).toBe(String(task.getPriority()));
+  expect(taskPriorityElement.getAttribute('type')).toBe('range');
+  assertHasTagName(taskPriorityElement, DomRenderizer.elementsTagForTaskPriority);
+  if (readonly){
+    expect(taskPriorityElement.getAttribute('readonly')).toBeTruthy();
+  }
+}
+
+function assertHasTagName(element, tagName){
+  expect(element.tagName.toLowerCase()).toBe(tagName);
+}
 
 describe('Funcionalidad: Tasks tienen botón de edición', () => {
   test('ConcreteTask tiene botón de edición', () => {
@@ -839,13 +1415,18 @@ describe('Funcionalidad: Task resumes', () => {
   });
 });
 
-afterEach(() => {
+beforeEach(() => {
     document.body.innerHTML = '';
 });
 
 beforeAll(() => {
-  HTMLDialogElement.prototype.showModal = jest.fn();
-  HTMLDialogElement.prototype.close = jest.fn();
+  HTMLDialogElement.prototype.showModal = jest.fn(function mock() {
+    this.open = true;
+  });
+
+  HTMLDialogElement.prototype.close = jest.fn(function mock() {
+    this.open = false;
+  });
 });
 
 function assertTaskResumeContentIsCorrect(aTaskResume, aTask){
