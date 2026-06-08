@@ -19,9 +19,8 @@ export class AppController{
         this.#storage.deleteNote(noteReplica);
     }
 
-    deleteTask(formFieldsAndData){
-        const taskReplica    = Task.createConcreteTask(formFieldsAndData.dueDate, formFieldsAndData.priorityValue, formFieldsAndData.title, formFieldsAndData.description);
-        this.#storage.deleteTask(taskReplica);
+    deleteTask(taskToDelete){
+        this.#storage.deleteTask(taskToDelete);
     }
 
     editNote(oldFieldsAndData, formFieldsAndData){
@@ -58,5 +57,13 @@ export class AppController{
     displayNotes(){
         const savedNotes = this.#storage.getAllNotes();
         savedNotes.forEach(note => this.#dom.displayNote(note));
+    }
+
+    getAllTasks(){
+
+    }
+
+    addSubtasksTo(){
+        
     }
 }

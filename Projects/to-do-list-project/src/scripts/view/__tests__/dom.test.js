@@ -9,6 +9,8 @@ import defaultValues from "../../../appConstantValues.json" with {type: "json"};
 import { addDays, isSameDay, addYears } from "date-fns";
 import { AppController } from "../../controllers/appController.js";
 import { DomController } from "../../controllers/domController.js";
+import   fs from 'fs';
+import   path from 'path';
 
 /*Esqueleto de un test:
 describe('Funcionalidad: ', () => {
@@ -132,14 +134,14 @@ describe('Funcionalidad: renderizar una tarea tiene clase de tareas y específic
   test('ConcreteTask al ser renderizada contiene clase de tareas y clase para concreteTasks', () => {
     const dom = new DomRenderizer();
     const task = Task.createConcreteTask();
-    renderedTaskElementContainsClass(dom, task, DomRenderizer.taskClass);
+    renderedTaskElementContainsClass(dom, task, DomRenderizer.taskCardClass);
     renderedTaskElementContainsClass(dom, task, DomRenderizer.concreteTaskClass);
     renderedTaskElementDoesntContainsClass(dom, task, DomRenderizer.compositeTaskClass);
     });
   test('CompositeTask al ser renderizada contiene clase de tareas y clase para compositeTasks', () => {
     const dom = new DomRenderizer();
     const task = Task.createCompositeTask([Task.createConcreteTask(addYears(new Date(), 100))]);
-    renderedTaskElementContainsClass(dom, task, DomRenderizer.taskClass);
+    renderedTaskElementContainsClass(dom, task, DomRenderizer.taskCardClass);
     renderedTaskElementDoesntContainsClass(dom, task, DomRenderizer.concreteTaskClass);
     renderedTaskElementContainsClass(dom, task, DomRenderizer.compositeTaskClass);
     });
@@ -181,6 +183,48 @@ describe('Funcionalidad: renderizar una tarea tiene un navbar con botón de subt
     expect(subtasksButton.textContent).toBe(DomRenderizer.renderedTaskInfoNavBarSubtaskButtonTextContent);
   });
 });
+describe('Funcionalidad: renderizar una tarea la agrega a pantalla', () => {
+  test('click sobre concreteTask renderizada la agrega a content display', () => {
+    const concreteTask = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[1], taskDescriptions[1]);
+    const dom = new DomRenderizer();
+    expect(document.body.querySelector('#contentDisplay').querySelector('.' + DomRenderizer.taskCardClass)).toBeNull(); 
+    const renderedTask = dom.renderTask(concreteTask);
+    const taskCard = document.body.querySelector('#contentDisplay').querySelector('.' + DomRenderizer.taskCardClass);
+    assertNotNullAndDefined(taskCard);
+    assertElementOfTaskTitleElementIsCorrect(taskCard, concreteTask);
+    assertElementOfTaskDescriptionElementIsCorrect(taskCard, concreteTask);
+    assertElementOfTaskDueDateIsCorrect(taskCard, concreteTask);
+    assertElementOfTaskPriorityIsCorrect(taskCard, concreteTask);
+  });
+  test('click sobre compositeTask renderizada la agrega a content display', () => {
+    const concreteTask = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[1], taskDescriptions[1]);
+    const compositeTask = Task.createCompositeTask([concreteTask], taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, taskTitles[0], taskDescriptions[0])
+    const dom = new DomRenderizer();
+    expect(document.body.querySelector('#contentDisplay').querySelector('.' + DomRenderizer.taskCardClass)).toBeNull(); 
+    const renderedTask = dom.renderTask(compositeTask);
+    const taskCard = document.body.querySelector('#contentDisplay').querySelector('.' + DomRenderizer.taskCardClass);
+    assertNotNullAndDefined(taskCard);
+    assertElementOfTaskTitleElementIsCorrect(taskCard, compositeTask);
+    assertElementOfTaskDescriptionElementIsCorrect(taskCard, compositeTask);
+    assertElementOfTaskDueDateIsCorrect(taskCard, compositeTask);
+    assertElementOfTaskPriorityIsCorrect(taskCard, compositeTask);
+  });
+  test('click sobre compositeTask renderizada la agrega a content display y saca la que estaba antes', () => {
+    const concreteTask = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[1], taskDescriptions[1]);
+    const compositeTask = Task.createCompositeTask([concreteTask], taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, taskTitles[0], taskDescriptions[0])
+    const dom = new DomRenderizer();
+    expect(document.body.querySelector('#contentDisplay').querySelector('.' + DomRenderizer.taskCardClass)).toBeNull(); 
+    const renderCompositeTask = dom.renderTask(compositeTask);
+    assertNotNullAndDefined(document.body.querySelector('#contentDisplay').querySelector('.' + DomRenderizer.taskCardClass));
+    const renderedTask = dom.renderTask(concreteTask);
+    const taskCard = document.body.querySelector('#contentDisplay').querySelector('.' + DomRenderizer.taskCardClass);
+    assertNotNullAndDefined(taskCard);
+    assertElementOfTaskTitleElementIsCorrect(taskCard, concreteTask);
+    assertElementOfTaskDescriptionElementIsCorrect(taskCard, concreteTask);
+    assertElementOfTaskDueDateIsCorrect(taskCard, concreteTask);
+    assertElementOfTaskPriorityIsCorrect(taskCard, concreteTask);
+  });
+});
 describe('Funcionalidad: Tareas tienen contenedor para ubicar contenido de los distintos botones del navbar', () => {  
   test('concreteTask y compositeTask al ser renderizadas contienen taskComponentsContainer', () => {
     const dom = new DomRenderizer();
@@ -196,7 +240,6 @@ describe('Funcionalidad: Tareas tienen contenedor para ubicar contenido de los d
     expect(compositeTaskRendered.querySelector('#' + DomRenderizer.renderedTasksComponentsContainerID).tagName.toLowerCase()).toBe(DomRenderizer.containersElementTag);
   });
 });
-
 describe('Funcionalidad: Botón subtask de navbar de CompositeTask renderizada muestra a sus dependientes como task resumes', () => {
   test('CompositeTask con una concreteTask dependiente al ser renderizada contiene nav para botones con botón de subtasks que al ser presionado pone dentro de tasksComponentsContainer a dependentsTaskContainer', () => {
     const dom = new DomRenderizer();
@@ -990,6 +1033,105 @@ describe('Funcionalidad: Tasks tienen botón de edición', () => {
     expect(taskEditButton.tagName.toLowerCase()).toBe('button');
     expect(taskEditButton.textContent).toBe(DomRenderizer.editTaskButtonTextContent);
   });
+  test('Botón de edición añade dialog al clickearlo', () => {
+    const dom          = new DomRenderizer();
+    const task         = Task.createCompositeTask([Task.createConcreteTask(addDays(new Date(), 4), defaultValues.taskPriorities.maxPriorityValue, 'a')]);
+    const renderedTask = dom.renderTask(task);
+    const taskEditButton = renderedTask.querySelector('#' + DomRenderizer.editTaskButtonID);
+    expect(document.body.querySelector('dialog')).toBeNull();
+    taskEditButton.click();
+    assertNotNullAndDefined(document.body.querySelector('dialog'));
+  });
+  test('Botón de edición añade y abre dialog al clickearlo ', () => {
+    const dom          = new DomRenderizer();
+    const task         = Task.createCompositeTask([Task.createConcreteTask(addDays(new Date(), 4), defaultValues.taskPriorities.maxPriorityValue, 'a')]);
+    const renderedTask = dom.renderTask(task);
+    const taskEditButton = renderedTask.querySelector('#' + DomRenderizer.editTaskButtonID);
+    expect(document.body.querySelector('dialog')).toBeNull();
+    taskEditButton.click();
+    const editionDialog = document.body.querySelector('dialog');
+    assertNotNullAndDefined(editionDialog);
+    expect(editionDialog.open).toBeTruthy();
+  });
+  test('Dialog contiene formulario con campos para editar tarea', () => {
+    const dom          = new DomRenderizer();
+    const task         = Task.createCompositeTask([Task.createConcreteTask(addDays(new Date(), 4), defaultValues.taskPriorities.maxPriorityValue, 'a')]);
+    const renderedTask = dom.renderTask(task);
+    const taskEditButton = renderedTask.querySelector('#' + DomRenderizer.editTaskButtonID);
+    taskEditButton.click();
+    const editionDialog = document.body.querySelector('dialog');
+    assertTaskCreationFormHasAllNeededFields(editionDialog.querySelector('#' + DomRenderizer.formFieldsContainerID));
+  });
+  test('Dialog contiene cancel button', () => {
+    const dom          = new DomRenderizer();
+    const task         = Task.createCompositeTask([Task.createConcreteTask(addDays(new Date(), 4), defaultValues.taskPriorities.maxPriorityValue, 'a')]);
+    const renderedTask = dom.renderTask(task);
+    const taskEditButton = renderedTask.querySelector('#' + DomRenderizer.editTaskButtonID);
+    taskEditButton.click();
+    const editionDialog = document.body.querySelector('dialog');
+    assertNotNullAndDefined(editionDialog.querySelector('#' + DomRenderizer.cancelCreationFormButtonID));
+  });
+  test('cancel button al presionarlo cierra dialog', () => {
+    const dom          = new DomRenderizer();
+    const task         = Task.createCompositeTask([Task.createConcreteTask(addDays(new Date(), 4), defaultValues.taskPriorities.maxPriorityValue, 'a')]);
+    const renderedTask = dom.renderTask(task);
+    const taskEditButton = renderedTask.querySelector('#' + DomRenderizer.editTaskButtonID);
+    taskEditButton.click();
+    const editionDialog = document.body.querySelector('dialog');
+    const cancelButton = editionDialog.querySelector('#' + DomRenderizer.cancelCreationFormButtonID);
+    expect(editionDialog.open).toBeTruthy();
+    cancelButton.click();
+    expect(editionDialog.open).toBeFalsy();
+  });
+  test('Dialog contiene submit button', () => {
+    const dom          = new DomRenderizer();
+    const task         = Task.createCompositeTask([Task.createConcreteTask(addDays(new Date(), 4), defaultValues.taskPriorities.maxPriorityValue, 'a')]);
+    const renderedTask = dom.renderTask(task);
+    const taskEditButton = renderedTask.querySelector('#' + DomRenderizer.editTaskButtonID);
+    taskEditButton.click();
+    const editionDialog = document.body.querySelector('dialog');
+    assertNotNullAndDefined(editionDialog.querySelector('#' + DomRenderizer.creationFormSubmitButtonID));
+  });
+  test('submit button al presionarlo envía mensaje de editTask a appController', () => {
+    let taskToEdit;
+    const appController = {
+      editTask: (originalTask, fields) => taskToEdit = fields
+    };
+    const dom = new DomRenderizer(appController);
+    const task = Task.createCompositeTask([Task.createConcreteTask(addDays(new Date(), 4), defaultValues.taskPriorities.maxPriorityValue, 'a')], taskDueDates[1]);
+    const renderedTask = dom.renderTask(task);
+    const taskEditButton = renderedTask.querySelector('#' + DomRenderizer.editTaskButtonID);
+    taskEditButton.click();
+    const editionDialog = document.body.querySelector('dialog');
+    const submitButton = editionDialog.querySelector('#' + DomRenderizer.creationFormSubmitButtonID);
+    fillTaskForm(editionDialog.querySelector('#' + DomRenderizer.formFieldsContainerID));
+    submitButton.click();
+    expect(taskToEdit.title).not.toEqual(task.getTitle());
+    expect(taskToEdit.description).not.toEqual(task.getDescription());
+    expect(taskToEdit.dueDate).not.toEqual(task.getDueDate());
+    expect(taskToEdit.priorityValue).not.toEqual(task.getPriority());
+    expect(taskToEdit.title).toEqual("taskTitle");
+    expect(taskToEdit.description).toEqual("taskDescription");
+    expect(taskToEdit.dueDate).toEqual(new Date().toISOString().split('T')[0]);
+    expect(taskToEdit.priorityValue).toEqual(String(defaultValues.taskPriorities.minPriorityValue));
+  });
+  test('Formulario inicia con información de la tarea cargada en los campos', () => {
+    let taskToEdit;
+    const appController = {
+      editTask: (originalTask, fields) => taskToEdit = fields
+    };
+    const dom = new DomRenderizer(appController);
+    const task = Task.createCompositeTask([Task.createConcreteTask(addDays(new Date(), 4), defaultValues.taskPriorities.maxPriorityValue, 'a')]);
+    const renderedTask = dom.renderTask(task);
+    const taskEditButton = renderedTask.querySelector('#' + DomRenderizer.editTaskButtonID);
+    taskEditButton.click();
+    const editionDialog = document.body.querySelector('dialog');
+    const form = editionDialog.querySelector('#' + DomRenderizer.formFieldsContainerID);
+    expect(form.querySelector('#' + DomRenderizer.taskFormTitleInputID).textContent).toEqual(task.getTitle());
+    expect(form.querySelector('#' + DomRenderizer.taskFormDescriptionInputID).textContent).toEqual(task.getDescription());
+    expect(form.querySelector('#' + DomRenderizer.taskFormDueDateInputID).getAttribute('value')).toEqual(task.getDueDate());
+    expect(form.querySelector('#' + DomRenderizer.taskFormPriorityValueSelectInputID).getAttribute('value')).toEqual(String(task.getPriority()));
+  });
 });
 describe('Funcionalidad: Tasks tienen botón de borrado', () => {
   test('ConcreteTask tiene botón de borrado', () => {
@@ -1009,6 +1151,105 @@ describe('Funcionalidad: Tasks tienen botón de borrado', () => {
     expect(taskDeleteButton).not.toBeNull();
     expect(taskDeleteButton.tagName.toLowerCase()).toBe('button');
     expect(taskDeleteButton.textContent).toBe(DomRenderizer.deleteTaskButtonTextContent);
+  });
+  test('Presionar botón de borrado muestra dialog', () => {
+    const dom          = new DomRenderizer();
+    const task         = Task.createCompositeTask([Task.createConcreteTask(addDays(new Date(), 4), defaultValues.taskPriorities.maxPriorityValue, 'a')]);
+    const renderedTask = dom.renderTask(task);
+    const taskDeleteButton = renderedTask.querySelector('#' + DomRenderizer.deleteTaskButtonID);
+    expect(document.body.querySelector('dialog')).toBeNull();
+    taskDeleteButton.click();
+    const confirmationDialog = document.body.querySelector('dialog');
+    assertNotNullAndDefined(confirmationDialog);
+    expect(confirmationDialog.open).toBeTruthy();
+  });
+  test('Dialog tiene botón de cancelar', () => {
+    const dom          = new DomRenderizer();
+    const task         = Task.createCompositeTask([Task.createConcreteTask(addDays(new Date(), 4), defaultValues.taskPriorities.maxPriorityValue, 'a')]);
+    const renderedTask = dom.renderTask(task);
+    const taskDeleteButton = renderedTask.querySelector('#' + DomRenderizer.deleteTaskButtonID);
+    expect(document.body.querySelector('dialog')).toBeNull();
+    taskDeleteButton.click();
+    const confirmationDialog = document.body.querySelector('dialog');
+    const cancelButton = confirmationDialog.querySelector('.' + DomRenderizer.cancelActionButtonClass);
+    assertNotNullAndDefined(cancelButton);
+    assertHasTagName(cancelButton, 'button');
+  });
+  test('Presionar botón de cancelar cierra dialog pero no saca tarea de contentDisplay', () => {
+    const dom          = new DomRenderizer();
+    const task         = Task.createCompositeTask([Task.createConcreteTask(addDays(new Date(), 4), defaultValues.taskPriorities.maxPriorityValue, 'a')]);
+    const renderedTask = dom.renderTask(task);
+    assertNotNullAndDefined(document.body.querySelector('#contentDisplay').querySelector('.' + DomRenderizer.taskCardClass));
+    const taskDeleteButton = renderedTask.querySelector('#' + DomRenderizer.deleteTaskButtonID);
+    expect(document.body.querySelector('dialog')).toBeNull();
+    taskDeleteButton.click();
+    const confirmationDialog = document.body.querySelector('dialog');
+    const cancelButton = confirmationDialog.querySelector('.' + DomRenderizer.cancelActionButtonClass);
+    cancelButton.click();
+    expect(document.body.querySelector('dialog')).toBeNull();
+    expect(confirmationDialog.open).toBeFalsy();
+    assertNotNullAndDefined(document.body.querySelector('#contentDisplay').querySelector('.' + DomRenderizer.taskCardClass));
+  });
+  test('Dialog tiene botón de confirmar', () => {
+    const dom          = new DomRenderizer();
+    const task         = Task.createCompositeTask([Task.createConcreteTask(addDays(new Date(), 4), defaultValues.taskPriorities.maxPriorityValue, 'a')]);
+    const renderedTask = dom.renderTask(task);
+    const taskDeleteButton = renderedTask.querySelector('#' + DomRenderizer.deleteTaskButtonID);
+    expect(document.body.querySelector('dialog')).toBeNull();
+    taskDeleteButton.click();
+    const confirmationDialog = document.body.querySelector('dialog');
+    const confirmButton = confirmationDialog.querySelector('.' + DomRenderizer.confirmActionButtonClass);
+    assertNotNullAndDefined(confirmButton);
+    assertHasTagName(confirmButton, 'button');
+  });
+  test('botón de confirmar al ser presionado manda deleteTask a appController', () => {
+    let taskToDelete;
+    const appController = {deleteTask: (task) => taskToDelete = task};
+    const dom           = new DomRenderizer(appController);
+    const task          = Task.createCompositeTask([Task.createConcreteTask(addDays(new Date(), 4), defaultValues.taskPriorities.maxPriorityValue, 'a')]);
+    const renderedTask  = dom.renderTask(task);
+    const taskDeleteButton = renderedTask.querySelector('#' + DomRenderizer.deleteTaskButtonID);
+    expect(document.body.querySelector('dialog')).toBeNull();
+    taskDeleteButton.click();
+    const confirmationDialog = document.body.querySelector('dialog');
+    const confirmButton = confirmationDialog.querySelector('.' + DomRenderizer.confirmActionButtonClass);
+    confirmButton.click();
+    expect(taskToDelete).toEqual(task);
+  });
+  test('botón de confirmar al ser presionado también cierra dialog y lo saca del dom', () => {
+    let taskToDelete;
+    const appController = {deleteTask: (task) => taskToDelete = task};
+    const dom           = new DomRenderizer(appController);
+    const task          = Task.createCompositeTask([Task.createConcreteTask(addDays(new Date(), 4), defaultValues.taskPriorities.maxPriorityValue, 'a')]);
+    const renderedTask  = dom.renderTask(task);
+    const taskDeleteButton = renderedTask.querySelector('#' + DomRenderizer.deleteTaskButtonID);
+    expect(document.body.querySelector('dialog')).toBeNull();
+    taskDeleteButton.click();
+    const confirmationDialog = document.body.querySelector('dialog');
+    const confirmButton = confirmationDialog.querySelector('.' + DomRenderizer.confirmActionButtonClass);
+    confirmButton.click();
+    expect(confirmationDialog.open).toBeFalsy();
+    expect(document.body.querySelector('dialog')).toBeNull();
+  });
+});
+describe('Funcionalidad: Tasks tienen botón de cerrar pestaña que la saca de content display', () => {
+  test('click sobre task renderizada la agrega close button a content display', () => {
+    const concreteTask = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[1], taskDescriptions[1]);
+    const dom = new DomRenderizer();
+    const renderedTask = dom.renderTask(concreteTask);
+    const taskCard = document.body.querySelector('#contentDisplay').querySelector('.' + DomRenderizer.taskCardClass);
+    const closeButton = taskCard.querySelector('.' + DomRenderizer.closeButtonClass);
+    assertNotNullAndDefined(closeButton);
+    assertHasTagName(closeButton, 'button');
+  });
+  test('click sobre close button la saca del content display', () => {
+    const concreteTask = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.defaultConcreteTaskPriorityValue, taskTitles[1], taskDescriptions[1]);
+    const dom = new DomRenderizer();
+    const renderedTask = dom.renderTask(concreteTask);
+    const taskCard = document.body.querySelector('#contentDisplay').querySelector('.' + DomRenderizer.taskCardClass);
+    const closeButton = taskCard.querySelector('.' + DomRenderizer.closeButtonClass);
+    closeButton.click();
+    expect(document.body.querySelector('#contentDisplay').querySelector('.' + DomRenderizer.taskCardClass)).toBeNull();
   });
 });
 describe('Funcionalidad: renderizar una nota contiene su título', () => {
@@ -1049,15 +1290,101 @@ describe('Funcionalidad: renderizar una nota contiene botón de edición', () =>
     expect(button.tagName.toLowerCase()).toBe('button');
     expect(button.textContent).toBe(DomRenderizer.editNoteButtonTextContent);
   });
-  test('Presionar botón ejecuta handler', () => {
+  test('Presionar botón ejecuta muestra dialog', () => {
     const dom = new DomRenderizer();
     const note = new Note(noteTitles[0], noteBodies[0]);
-    let   handlerExecuted = false;
-    const renderedNote = dom.renderNote(note, () => handlerExecuted = true);
+    const renderedNote = dom.renderNote(note);
     const button = renderedNote.querySelector('#' + DomRenderizer.editNoteButtonID); 
+    expect(document.body.querySelector('dialog')).toBeNull();
     button.click();
-    expect(handlerExecuted).toBeTruthy();
-  });  
+    const editionDialog = document.body.querySelector('dialog');
+    assertNotNullAndDefined(editionDialog);
+    expect(editionDialog.open).toBeTruthy();
+  });
+  test('Dialog tiene formulario para modificar nota', () => {
+    const dom = new DomRenderizer();
+    const note = new Note(noteTitles[0], noteBodies[0]);
+    const renderedNote = dom.renderNote(note);
+    const button = renderedNote.querySelector('#' + DomRenderizer.editNoteButtonID); 
+    expect(document.body.querySelector('dialog')).toBeNull();
+    button.click();
+    const editionDialog = document.body.querySelector('dialog');
+    const noteEditionForm = editionDialog.querySelector('#' + DomRenderizer.formFieldsContainerID);
+    assertNotNullAndDefined(noteEditionForm);
+    assertNoteCreationFormHasAllNeededFields(noteEditionForm);
+  });
+  test('Dialog tiene formulario para modificar nota con datos de nota ya cargados', () => {
+    const dom = new DomRenderizer();
+    const note = new Note(noteTitles[0], noteBodies[0]);
+    const renderedNote = dom.renderNote(note);
+    const button = renderedNote.querySelector('#' + DomRenderizer.editNoteButtonID); 
+    expect(document.body.querySelector('dialog')).toBeNull();
+    button.click();
+    const editionDialog = document.body.querySelector('dialog');
+    const noteEditionForm = editionDialog.querySelector('#' + DomRenderizer.formFieldsContainerID);
+    expect(noteEditionForm.querySelector('#' + DomRenderizer.noteFormTitleInputID).textContent).toBe(note.getTitle());
+    expect(noteEditionForm.querySelector('#' + DomRenderizer.noteFormBodyInputID).textContent).toBe(note.getBody());
+  });
+  test('Dialog tiene boton de cancelar', () => {
+    const dom = new DomRenderizer();
+    const note = new Note(noteTitles[0], noteBodies[0]);
+    const renderedNote = dom.renderNote(note);
+    const button = renderedNote.querySelector('#' + DomRenderizer.editNoteButtonID); 
+    expect(document.body.querySelector('dialog')).toBeNull();
+    button.click();
+    const editionDialog = document.body.querySelector('dialog');
+    const cancelButton = editionDialog.querySelector('#' + DomRenderizer.cancelCreationFormButtonID);
+    assertNotNullAndDefined(cancelButton);
+    assertHasTagName(cancelButton, 'button');
+  });
+  test('Boton de cancelar al ser presionado cierra dialog', () => {
+    const dom = new DomRenderizer();
+    const note = new Note(noteTitles[0], noteBodies[0]);
+    const renderedNote = dom.renderNote(note);
+    const button = renderedNote.querySelector('#' + DomRenderizer.editNoteButtonID); 
+    expect(document.body.querySelector('dialog')).toBeNull();
+    button.click();
+    const editionDialog = document.body.querySelector('dialog');
+    const cancelButton = editionDialog.querySelector('#' + DomRenderizer.cancelCreationFormButtonID);
+    cancelButton.click();
+    expect(editionDialog.open).toBeFalsy();
+    expect(document.body.querySelector('dialog')).toBeNull();
+  });
+  test('Dialog tiene botón de submit', () => {
+    const dom = new DomRenderizer();
+    const note = new Note(noteTitles[0], noteBodies[0]);
+    const renderedNote = dom.renderNote(note);
+    const button = renderedNote.querySelector('#' + DomRenderizer.editNoteButtonID); 
+    expect(document.body.querySelector('dialog')).toBeNull();
+    button.click();
+    const editionDialog = document.body.querySelector('dialog');
+    const submitButton = editionDialog.querySelector('#' + DomRenderizer.creationFormSubmitButtonID);
+    assertNotNullAndDefined(submitButton);
+    assertHasTagName(submitButton, 'button');
+  });
+  test('Submit button al ser presionado manda tarea a appcontroller', () => {
+    let noteToEdit;
+    let updatedData;
+    const appController = {editNote: (note, newData) => {
+        noteToEdit = note; 
+        updatedData = newData;
+      }
+    };
+    const dom = new DomRenderizer(appController);
+    const note = new Note(noteTitles[0], noteBodies[0]);
+    const renderedNote = dom.renderNote(note);
+    const button = renderedNote.querySelector('#' + DomRenderizer.editNoteButtonID); 
+    expect(document.body.querySelector('dialog')).toBeNull();
+    button.click();
+    const editionDialog = document.body.querySelector('dialog');
+    const submitButton = editionDialog.querySelector('#' + DomRenderizer.creationFormSubmitButtonID);
+    const noteEditionForm = editionDialog.querySelector('#' + DomRenderizer.formFieldsContainerID);
+    fillNoteForm(noteEditionForm);
+    submitButton.click();
+    expect(noteToEdit).toEqual(note);
+    expect(updatedData.title).toBe('noteTitle');
+    expect(updatedData.body).toBe('noteBody');
+  });
 });
 describe('Funcionalidad: renderizar una nota contiene botón de borrado', () => {
   test('Contiene botón con id', () => {
@@ -1069,15 +1396,80 @@ describe('Funcionalidad: renderizar una nota contiene botón de borrado', () => 
     expect(button.tagName.toLowerCase()).toBe('button');
     expect(button.textContent).toBe(DomRenderizer.deleteNoteButtonTextContent);
   });
-  test('Presionar botón ejecuta handler', () => {
+  test('Presionar botón de borrado abre dialog', () => {
     const dom = new DomRenderizer();
     const note = new Note(noteTitles[0], noteBodies[0]);
-    let   handlerExecuted = false;
-    const renderedNote = dom.renderNote(note, () => true , () => handlerExecuted = true);
+    const renderedNote = dom.renderNote(note);
     const button = renderedNote.querySelector('#' + DomRenderizer.deleteNoteButtonID); 
     button.click();
-    expect(handlerExecuted).toBeTruthy();
-  });  
+    const confirmationDialog = document.body.querySelector('dialog');
+    assertNotNullAndDefined(confirmationDialog);
+    expect(confirmationDialog.open).toBeTruthy();
+  });
+  test('Dialog contiene boton de cancelar', () => {
+    const dom = new DomRenderizer();
+    const note = new Note(noteTitles[0], noteBodies[0]);
+    const renderedNote = dom.renderNote(note);
+    const button = renderedNote.querySelector('#' + DomRenderizer.deleteNoteButtonID); 
+    button.click();
+    const confirmationDialog = document.body.querySelector('dialog');
+    const cancelButton = confirmationDialog.querySelector('.' + DomRenderizer.cancelActionButtonClass);
+    assertNotNullAndDefined(cancelButton);
+    assertHasTagName(cancelButton, 'button');
+  });
+  test('Boton de cancelar al ser presionado cierra dialog y lo borra del dom', () => {
+    const dom = new DomRenderizer();
+    const note = new Note(noteTitles[0], noteBodies[0]);
+    const renderedNote = dom.renderNote(note);
+    const button = renderedNote.querySelector('#' + DomRenderizer.deleteNoteButtonID); 
+    button.click();
+    const confirmationDialog = document.body.querySelector('dialog');
+    const cancelButton = confirmationDialog.querySelector('.' + DomRenderizer.cancelActionButtonClass);
+    expect(confirmationDialog.open).toBeTruthy();
+    cancelButton.click();
+    expect(confirmationDialog.open).toBeFalsy();
+    expect(document.querySelector('dialog')).toBeNull();
+  });
+  test('Dialog contiene boton de confirmar', () => {
+    const dom = new DomRenderizer();
+    const note = new Note(noteTitles[0], noteBodies[0]);
+    const renderedNote = dom.renderNote(note);
+    const button = renderedNote.querySelector('#' + DomRenderizer.deleteNoteButtonID); 
+    button.click();
+    const confirmationDialog = document.body.querySelector('dialog');
+    const confirmButton = confirmationDialog.querySelector('.' + DomRenderizer.confirmActionButtonClass);
+    assertNotNullAndDefined(confirmButton);
+    assertHasTagName(confirmButton, 'button');
+  });
+  test('Boton de confirmar al ser presionado envía nota a appcontroller', () => {
+    let noteToDelete;
+    const appController = {deleteNote: (note) => noteToDelete = note};
+    const dom = new DomRenderizer(appController);
+    const note = new Note(noteTitles[0], noteBodies[0]);
+    const renderedNote = dom.renderNote(note);
+    const button = renderedNote.querySelector('#' + DomRenderizer.deleteNoteButtonID); 
+    button.click();
+    const confirmationDialog = document.body.querySelector('dialog');
+    const confirmButton = confirmationDialog.querySelector('.' + DomRenderizer.confirmActionButtonClass);
+    expect(confirmationDialog.open).toBeTruthy();
+    confirmButton.click();
+    expect(noteToDelete).toEqual(note);
+  });
+  test('Boton de confirmar al ser presionado también cierra dialog y lo saca del dom', () => {
+    let noteToDelete;
+    const appController = {deleteNote: (note) => noteToDelete = note};
+    const dom = new DomRenderizer(appController);
+    const note = new Note(noteTitles[0], noteBodies[0]);
+    const renderedNote = dom.renderNote(note);
+    const button = renderedNote.querySelector('#' + DomRenderizer.deleteNoteButtonID); 
+    button.click();
+    const confirmationDialog = document.body.querySelector('dialog');
+    const confirmButton = confirmationDialog.querySelector('.' + DomRenderizer.confirmActionButtonClass);
+    expect(confirmationDialog.open).toBeTruthy();
+    confirmButton.click();
+    expect(confirmationDialog.open).toBeFalsy();
+    expect(document.querySelector('dialog')).toBeNull();
+  });
 });
 describe('Funcionalidad: Formulario de creación de contenido', () => {
   test('Contiene método para crear formulario', () => {
@@ -1414,9 +1806,269 @@ describe('Funcionalidad: Task resumes', () => {
     expect(handlerExecuted).toBeTruthy();
   });
 });
+describe('Funcionalidad: Construir TasksTree', () => {
+  test('Renderizer tiene método para construir taskTree', () => {
+    const aDomRenderizer = new DomRenderizer();
+    expect(aDomRenderizer.renderTaskTree).toBeDefined();
+  });
+  test('Renderizer añade task tree container al dom', () => {
+    const aDomRenderizer = new DomRenderizer();
+    aDomRenderizer.renderTaskTree([]);
+    const taskTreeContainer = document.body.querySelector('.' + DomRenderizer.taskTreeContainerClass);
+    assertNotNullAndDefined(taskTreeContainer);
+    assertHasTagName(taskTreeContainer, DomRenderizer.containersElementTag);
+  });
+  test('Al recibir una tarea tiene un li dentro de la lista', () => {
+    const aDomRenderizer = new DomRenderizer();
+    const task = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.minPriorityValue, taskTitles[1], taskDescriptions[1]);
+    aDomRenderizer.renderTaskTree([task]);
+    const taskTreeContainer = document.body.querySelector('.' + DomRenderizer.taskTreeContainerClass);
+    const tasksListItem = taskTreeContainer.querySelector('ul').querySelectorAll('li');
+    assertNotNullAndDefined(tasksListItem[0]);
+    assertHasTagName(tasksListItem[0], 'li');
+    expect(tasksListItem.length).toBe(1);
+  });
+  test('Al recibir varias tareas tiene un li dentro de la lista por cada una', () => {
+    const aDomRenderizer = new DomRenderizer();
+    const task = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.minPriorityValue, taskTitles[1], taskDescriptions[1]);
+    const anotherTask = Task.createConcreteTask(taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, taskTitles[0], taskDescriptions[1]);
+    const oneMoreTask = Task.createConcreteTask(taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, taskTitles[2], taskDescriptions[1]);
+    aDomRenderizer.renderTaskTree([task, anotherTask, oneMoreTask]);
+    const taskTreeContainer = document.body.querySelector('.' + DomRenderizer.taskTreeContainerClass);
+    const tasksListItems = taskTreeContainer.querySelectorAll('li');
+    assertNotNullAndDefined(tasksListItems[0]);
+    assertNotNullAndDefined(tasksListItems[1]);
+    assertNotNullAndDefined(tasksListItems[2]);
+    assertHasTagName(tasksListItems[0], 'li');
+    assertHasTagName(tasksListItems[1], 'li');
+    assertHasTagName(tasksListItems[2], 'li');
+    expect(tasksListItems.length).toBe(3);
+  });
+  test('con una sola tarea, dentro de li pone un details con un summary dentro', () => {
+    const aDomRenderizer = new DomRenderizer();
+    const task = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.minPriorityValue, taskTitles[1], taskDescriptions[1]);
+    aDomRenderizer.renderTaskTree([task]);
+    const taskTreeContainer = document.body.querySelector('.' + DomRenderizer.taskTreeContainerClass);
+    const tasksDetails = taskTreeContainer.querySelector('ul').querySelector('li').querySelector('details');
+    assertNotNullAndDefined(tasksDetails);
+    assertHasTagName(tasksDetails, 'details');
+    assertNotNullAndDefined(tasksDetails.querySelector('summary'));
+  });
+  test('dentro de cada summary pone task info apropiada', () => {
+    const aDomRenderizer = new DomRenderizer();
+    const task = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.minPriorityValue, taskTitles[1], taskDescriptions[1]);
+    const anotherTask = Task.createConcreteTask(taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, taskTitles[0], taskDescriptions[1]);
+    const oneMoreTask = Task.createConcreteTask(taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, taskTitles[2], taskDescriptions[1]);
+    const tasksForTaskTree = [task, anotherTask, oneMoreTask];
+    aDomRenderizer.renderTaskTree(tasksForTaskTree);
+    const taskTreeContainer = document.body.querySelector('.' + DomRenderizer.taskTreeContainerClass);
+    const tasksListItems = taskTreeContainer.querySelector('ul').querySelectorAll('li');
+    let i = 0;
+    tasksListItems.forEach(listItem => {
+      const summary = listItem.querySelector('details').querySelector('summary');
+      assertElementOfTaskTitleElementIsCorrect(summary, tasksForTaskTree[i]);
+      assertElementOfTaskDescriptionElementIsCorrect(summary, tasksForTaskTree[i]);
+      assertElementOfTaskDueDateIsCorrect(summary, tasksForTaskTree[i]);
+      assertElementOfTaskPriorityIsCorrect(summary, tasksForTaskTree[i]);
+      i++;
+    });
+  });
+  test('details de cada tarea inician como open', () => {
+    const aDomRenderizer = new DomRenderizer();
+    const task = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.minPriorityValue, taskTitles[1], taskDescriptions[1]);
+    const anotherTask = Task.createConcreteTask(taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, taskTitles[0], taskDescriptions[1]);
+    const oneMoreTask = Task.createConcreteTask(taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, taskTitles[2], taskDescriptions[1]);
+    const tasksForTaskTree = [task, anotherTask, oneMoreTask];
+    aDomRenderizer.renderTaskTree(tasksForTaskTree);
+    const taskTreeContainer = document.body.querySelector('.' + DomRenderizer.taskTreeContainerClass);
+    const tasksListItems = taskTreeContainer.querySelector('ul').querySelectorAll('li');
+    tasksListItems.forEach(listItem => {
+      expect(listItem.querySelector('details').getAttribute('open')).toBeTruthy();
+    });
+  });
+  test('task tree de composite task con una dependiente tiene dentro de details ul con un li', () => {
+    const aDomRenderizer = new DomRenderizer();
+    const task = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.minPriorityValue, taskTitles[1], taskDescriptions[1]);
+    const compositeTask = Task.createCompositeTask([task], taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, taskTitles[0], taskDescriptions[1]);
+    aDomRenderizer.renderTaskTree([compositeTask]);
+    const taskTreeContainer = document.body.querySelector('.' + DomRenderizer.taskTreeContainerClass);
+    const tasksListItemDetails = taskTreeContainer.querySelector('ul').querySelector('li').querySelector('details');
+    assertNotNullAndDefined(tasksListItemDetails.querySelector('li'));    
+  });
+  test('task tree de composite task con varias dependientes tiene dentro de details ul con tantos li como dependientes', () => {
+    const aDomRenderizer = new DomRenderizer();
+    const task = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.minPriorityValue, taskTitles[1], taskDescriptions[1]);
+    const anotherTask = Task.createConcreteTask(taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, taskTitles[0], taskDescriptions[1]);
+    const oneMoreTask = Task.createConcreteTask(taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, taskTitles[2], taskDescriptions[1]);
+    const subtasks = [task, anotherTask, oneMoreTask];
+    const compositeTask = Task.createCompositeTask(subtasks, taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, 'a', taskDescriptions[1]);
+    aDomRenderizer.renderTaskTree([compositeTask]);
+    const taskTreeContainer = document.body.querySelector('.' + DomRenderizer.taskTreeContainerClass);
+    const compositeTaskDetails = taskTreeContainer.querySelector('ul').querySelector('li').querySelector('details');
+    const compositeTaskDetailsSubtasksListItems = compositeTaskDetails.querySelectorAll('li');
+    expect(compositeTaskDetailsSubtasksListItems.length).toBe(3);
+  });
+  test('dentro de cada li de sus subtasks pone un details con un summary adentro', () => {
+    const aDomRenderizer = new DomRenderizer();
+    const task = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.minPriorityValue, taskTitles[1], taskDescriptions[1]);
+    const anotherTask = Task.createConcreteTask(taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, taskTitles[0], taskDescriptions[1]);
+    const oneMoreTask = Task.createConcreteTask(taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, taskTitles[2], taskDescriptions[1]);
+    const subtasks = [task, anotherTask, oneMoreTask];
+    const compositeTask = Task.createCompositeTask(subtasks, taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, 'a', taskDescriptions[1]);
+    aDomRenderizer.renderTaskTree([compositeTask]);
+    const taskTreeContainer = document.body.querySelector('.' + DomRenderizer.taskTreeContainerClass);
+    const compositeTaskDetails = taskTreeContainer.querySelector('ul').querySelector('li').querySelector('details');
+    const compositeTaskDetailsSubtasksList = compositeTaskDetails.querySelector('ul');
+    const compositeTaskDetailsSubtasksListItems = compositeTaskDetailsSubtasksList.querySelectorAll('li');
+    compositeTaskDetailsSubtasksListItems.forEach(subtaskListItem => {
+      const details = subtaskListItem.querySelector('details');
+      assertNotNullAndDefined(details);
+      assertHasTagName(details, 'details');
+      const summary = details.querySelector('summary');
+      assertNotNullAndDefined(summary);
+      assertHasTagName(summary, 'summary');
+    });
+  });
+  test('dentro de cada summary de subtask pone task info adecuada', () => {
+    const aDomRenderizer = new DomRenderizer();
+    const task = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.minPriorityValue, taskTitles[1], taskDescriptions[1]);
+    const anotherTask = Task.createConcreteTask(taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, taskTitles[0], taskDescriptions[1]);
+    const oneMoreTask = Task.createConcreteTask(taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, taskTitles[2], taskDescriptions[1]);
+    const subtasks = [task, anotherTask, oneMoreTask];
+    const compositeTask = Task.createCompositeTask(subtasks, taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, 'a', taskDescriptions[1]);
+    aDomRenderizer.renderTaskTree([compositeTask]);
+    const taskTreeContainer = document.body.querySelector('.' + DomRenderizer.taskTreeContainerClass);
+    const compositeTaskDetails = taskTreeContainer.querySelector('ul').querySelector('li').querySelector('details');
+    const compositeTaskDetailsSubtasksList = compositeTaskDetails.querySelector('ul');
+    const compositeTaskDetailsSubtasksListItems = compositeTaskDetailsSubtasksList.querySelectorAll('li');
+    let i = 0;
+    compositeTaskDetailsSubtasksListItems.forEach(subtaskListItem => {
+      const details = subtaskListItem.querySelector('details');
+      assertElementOfTaskTitleElementIsCorrect(details, subtasks[i]);
+      assertElementOfTaskDescriptionElementIsCorrect(details, subtasks[i]);
+      assertElementOfTaskDueDateIsCorrect(details, subtasks[i]);
+      assertElementOfTaskPriorityIsCorrect(details, subtasks[i]);
+      i++;
+    });
+  });
+  test('Task tree se añade a taskTreeContainer en html', () => {
+    const aDomRenderizer = new DomRenderizer();
+    const task = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.minPriorityValue, taskTitles[1], taskDescriptions[1]);
+    const anotherTask = Task.createConcreteTask(taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, taskTitles[0], taskDescriptions[1]);
+    const oneMoreTask = Task.createConcreteTask(taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, taskTitles[2], taskDescriptions[1]);
+    const subtasks = [task, anotherTask, oneMoreTask];
+    const compositeTask = Task.createCompositeTask(subtasks, taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, 'a', taskDescriptions[1]);
+    aDomRenderizer.renderTaskTree([compositeTask]);
+    const taskTreeContainer = document.body.querySelector('#taskTreeContainer');
+    const compositeTaskDetails = taskTreeContainer.querySelector('ul').querySelector('li').querySelector('details');
+    const compositeTaskDetailsSubtasksList = compositeTaskDetails.querySelector('ul');
+    const compositeTaskDetailsSubtasksListItems = compositeTaskDetailsSubtasksList.querySelectorAll('li');
+    let i = 0;
+    compositeTaskDetailsSubtasksListItems.forEach(subtaskListItem => {
+      const details = subtaskListItem.querySelector('details');
+      assertElementOfTaskTitleElementIsCorrect(details, subtasks[i]);
+      assertElementOfTaskDescriptionElementIsCorrect(details, subtasks[i]);
+      assertElementOfTaskDueDateIsCorrect(details, subtasks[i]);
+      assertElementOfTaskPriorityIsCorrect(details, subtasks[i]);
+      i++;
+    });
+    assertNotNullAndDefined(taskTreeContainer);
+  });
+  test('Click en una list item de una tarea concreteTask añade a contentDisplay su card', () => {
+    const aDomRenderizer = new DomRenderizer();
+    const task = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.minPriorityValue, taskTitles[1], taskDescriptions[1]);
+    aDomRenderizer.renderTaskTree([task]);
+    const taskTreeContainer = document.body.querySelector('#taskTreeContainer');
+    expect(document.body.querySelector('#contentDisplay').querySelector('.' + DomRenderizer.taskCardClass)).toBeNull();
+    const taskListItem = taskTreeContainer.querySelector('ul').querySelector('li');
+    taskListItem.querySelector('details').querySelector('summary').click();
+    const contentDisplay = document.body.querySelector('#contentDisplay');
+    const cardView = contentDisplay.querySelector('.' + DomRenderizer.taskCardClass);
+    assertNotNullAndDefined(cardView);
+    assertElementOfTaskTitleElementIsCorrect(cardView, task);
+    assertElementOfTaskDescriptionElementIsCorrect(cardView, task);
+    assertElementOfTaskDueDateIsCorrect(cardView, task);
+    assertElementOfTaskPriorityIsCorrect(cardView, task);
+  });
+  test('Click en una list item de una tarea compositeTask añade a contentDisplay su card', () => {
+    const aDomRenderizer = new DomRenderizer();
+    const task = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.minPriorityValue, taskTitles[1], taskDescriptions[1]);
+    const anotherTask = Task.createConcreteTask(taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, taskTitles[0], taskDescriptions[1]);
+    const oneMoreTask = Task.createConcreteTask(taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, taskTitles[2], taskDescriptions[1]);
+    const subtasks = [task, anotherTask, oneMoreTask];
+    const compositeTask = Task.createCompositeTask(subtasks, taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, 'a', taskDescriptions[1]);
+    aDomRenderizer.renderTaskTree([compositeTask]);
+    const taskTreeContainer = document.body.querySelector('#taskTreeContainer');
+    expect(document.body.querySelector('#contentDisplay').querySelector('.' + DomRenderizer.taskCardClass)).toBeNull();
+    const taskListItems = taskTreeContainer.querySelector('ul').querySelectorAll('li');
+    taskListItems[0].querySelector('details').querySelector('summary').click();
+    const contentDisplay = document.body.querySelector('#contentDisplay');
+    const cardView = contentDisplay.querySelector('.' + DomRenderizer.taskCardClass);
+    assertNotNullAndDefined(cardView);
+    assertElementOfTaskTitleElementIsCorrect(cardView, compositeTask);
+    assertElementOfTaskDescriptionElementIsCorrect(cardView, compositeTask);
+    assertElementOfTaskDueDateIsCorrect(cardView, compositeTask);
+    assertElementOfTaskPriorityIsCorrect(cardView, compositeTask);
+  });
+  test('Click en una list item de una tarea añade a contentDisplay su card y al clickear otra lo saca para poner el de la suya', () => {
+    const aDomRenderizer = new DomRenderizer();
+    const task = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.minPriorityValue, taskTitles[1], taskDescriptions[1]);
+    const anotherTask = Task.createConcreteTask(taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, taskTitles[0], taskDescriptions[1]);
+    const oneMoreTask = Task.createConcreteTask(taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, taskTitles[2], taskDescriptions[1]);
+    const subtasks = [task, anotherTask, oneMoreTask];
+    const compositeTask = Task.createCompositeTask(subtasks, taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, 'a', taskDescriptions[1]);
+    aDomRenderizer.renderTaskTree([compositeTask]);
+    const taskTreeContainer = document.body.querySelector('#taskTreeContainer');
+    expect(document.body.querySelector('#contentDisplay').querySelector('.' + DomRenderizer.taskCardClass)).toBeNull();
+    const taskListItems = taskTreeContainer.querySelector('ul').querySelectorAll('li');
+    taskListItems[0].querySelector('details').querySelector('summary').click();
+    const contentDisplay = document.body.querySelector('#contentDisplay');
+    let cardView = contentDisplay.querySelector('.' + DomRenderizer.taskCardClass);
+    assertNotNullAndDefined(cardView);
+    assertElementOfTaskTitleElementIsCorrect(cardView, compositeTask);
+    assertElementOfTaskDescriptionElementIsCorrect(cardView, compositeTask);
+    assertElementOfTaskDueDateIsCorrect(cardView, compositeTask);
+    assertElementOfTaskPriorityIsCorrect(cardView, compositeTask);
+    taskListItems[1].querySelector('details').querySelector('summary').click();
+    cardView = contentDisplay.querySelector('.' + DomRenderizer.taskCardClass);
+    assertNotNullAndDefined(cardView);
+    assertElementOfTaskTitleElementIsCorrect(cardView, task);
+    assertElementOfTaskDescriptionElementIsCorrect(cardView, task);
+    assertElementOfTaskDueDateIsCorrect(cardView, task);
+    assertElementOfTaskPriorityIsCorrect(cardView, task);
+  });
+  test('Click en una list item de una tarea añade a contentDisplay su card y al clickear otra lo saca para poner el de la suya pero siendo composite ambas', () => {
+    const aDomRenderizer = new DomRenderizer();
+    const task = Task.createConcreteTask(taskDueDates[1], defaultValues.taskPriorities.minPriorityValue, taskTitles[1], taskDescriptions[1]);
+    const anotherTask = Task.createConcreteTask(taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, taskTitles[0], taskDescriptions[1]);
+    const oneMoreTask = Task.createCompositeTask([anotherTask], taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, taskTitles[2], taskDescriptions[1]);
+    const subtasks = [task, oneMoreTask];
+    const compositeTask = Task.createCompositeTask(subtasks, taskDueDates[2], defaultValues.taskPriorities.minPriorityValue, 'a', taskDescriptions[1]);
+    aDomRenderizer.renderTaskTree([compositeTask]);
+    const taskTreeContainer = document.body.querySelector('#taskTreeContainer');
+    expect(document.body.querySelector('#contentDisplay').querySelector('.' + DomRenderizer.taskCardClass)).toBeNull();
+    const taskListItems = taskTreeContainer.querySelector('ul').querySelectorAll('li');
+    taskListItems[0].querySelector('details').querySelector('summary').click();
+    const contentDisplay = document.body.querySelector('#contentDisplay');
+    let cardView = contentDisplay.querySelector('.' + DomRenderizer.taskCardClass);
+    assertNotNullAndDefined(cardView);
+    assertElementOfTaskTitleElementIsCorrect(cardView, compositeTask);
+    assertElementOfTaskDescriptionElementIsCorrect(cardView, compositeTask);
+    assertElementOfTaskDueDateIsCorrect(cardView, compositeTask);
+    assertElementOfTaskPriorityIsCorrect(cardView, compositeTask);
+    taskListItems[2].querySelector('details').querySelector('summary').click();
+    cardView = contentDisplay.querySelector('.' + DomRenderizer.taskCardClass);
+    assertNotNullAndDefined(cardView);
+    assertElementOfTaskTitleElementIsCorrect(cardView, oneMoreTask);
+    assertElementOfTaskDescriptionElementIsCorrect(cardView, oneMoreTask);
+    assertElementOfTaskDueDateIsCorrect(cardView, oneMoreTask);
+    assertElementOfTaskPriorityIsCorrect(cardView, oneMoreTask);
+  });
+});
 
 beforeEach(() => {
-    document.body.innerHTML = '';
+  const html = fs.readFileSync(path.resolve(__dirname, '../../../index.html'));  
+  document.body.innerHTML = html;
 });
 
 beforeAll(() => {

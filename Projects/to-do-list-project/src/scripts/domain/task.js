@@ -185,12 +185,16 @@ class ConcreteTask extends Task{
         aDomRenderizer.addConcreteTaskClassToContainer(aContainer);
     }
 
-    renderWith(aDomRenderizer, anEditionHandler, aDeleteHandler){
-        return aDomRenderizer.renderConcreteTask(this, anEditionHandler, aDeleteHandler);
+    renderWith(aDomRenderizer){
+        return aDomRenderizer.renderConcreteTask(this);
     }
 
     subNavBarButtonHandlerWith(aDomRenderizer, taskContainer){
         return aDomRenderizer.subNavBarButtonHandlerForConcreteTask(this, taskContainer);
+    }
+
+    createTaskTreeWith(aDomRenderizer){
+        return aDomRenderizer.createTaskTreeOfConcreteTask(this);
     }
 }
 
@@ -303,6 +307,10 @@ class CompositeTask extends Task{
 
     subNavBarButtonHandlerWith(aDomRenderizer, taskContainer){
         return aDomRenderizer.subNavBarButtonHandlerForCompositeTask(this, taskContainer);
+    }
+
+    createTaskTreeWith(aDomRenderizer){
+        return aDomRenderizer.createTaskTreeOfCompositeTask(this);
     }
 }
 
