@@ -11,5 +11,5 @@ const doubleCompositeTask = Task.createCompositeTask([compositeTask], addDays(ne
 document.body.appendChild(dom.renderTask(doubleCompositeTask));
 document.body.appendChild(dom.renderTask(task));
 document.body.appendChild(dom.renderCreateButton());
-
+dom.renderTaskTree([doubleCompositeTask]);
 const app = new AppController();

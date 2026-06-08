@@ -192,6 +192,10 @@ class ConcreteTask extends Task{
     subNavBarButtonHandlerWith(aDomRenderizer, taskContainer){
         return aDomRenderizer.subNavBarButtonHandlerForConcreteTask(this, taskContainer);
     }
+
+    createTaskTreeWith(aDomRenderizer){
+        return aDomRenderizer.createTaskTreeOfConcreteTask(this);
+    }
 }
 
 class CompositeTask extends Task{
@@ -303,6 +307,10 @@ class CompositeTask extends Task{
 
     subNavBarButtonHandlerWith(aDomRenderizer, taskContainer){
         return aDomRenderizer.subNavBarButtonHandlerForCompositeTask(this, taskContainer);
+    }
+
+    createTaskTreeWith(aDomRenderizer){
+        return aDomRenderizer.createTaskTreeOfCompositeTask(this);
     }
 }
 
